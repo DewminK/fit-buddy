@@ -10,22 +10,24 @@ import {
   TextInput,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchExercises, setFilter } from '../../store/slices/exercisesSlice';
-import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../../constants/themes';
-import { Exercise } from '../../store/slices/exercisesSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { fetchExercises, setFilter, clearFilters } from '../store/slices/exercisesSlice';
+import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../constants/themes';
+import { Exercise } from '../store/slices/exercisesSlice';
+
+interface HomeScreenProps {
+  navigation: any;
+}
 
 const MUSCLES = ['all', 'chest', 'back', 'biceps', 'triceps', 'shoulders', 'quadriceps', 'abdominals', 'lats'];
 const DIFFICULTIES = ['all', 'beginner', 'intermediate', 'expert'];
 
-export default function HomeScreen() {
-  const router = useRouter();
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   const dispatch = useAppDispatch();
-  const { filteredExercises, isLoading, currentFilter } = useAppSelector((state: any) => state.exercises);
-  const { user } = useAppSelector((state: any) => state.auth);
-  const isDark = useAppSelector((state: any) => state.theme.isDark);
-  const favorites = useAppSelector((state: any) => state.favorites.favorites);
+  const { filteredExercises, isLoading, currentFilter } = useAppSelector((state) => state.exercises);
+  const { user } = useAppSelector((state) => state.auth);
+  const isDark = useAppSelector((state) => state.theme.isDark);
+  const favorites = useAppSelector((state) => state.favorites.favorites);
   const theme = isDark ? darkTheme : lightTheme;
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,10 +56,10 @@ export default function HomeScreen() {
   };
 
   const isFavorite = (exerciseName: string) => {
-    return favorites.some((fav: any) => fav.name === exerciseName);
+    return favorites.some((fav) => fav.name === exerciseName);
   };
 
-  const filteredBySearch = filteredExercises.filter((exercise: any) =>
+  const filteredBySearch = filteredExercises.filter((exercise) =>
     exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     exercise.muscle.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -65,7 +67,7 @@ export default function HomeScreen() {
   const renderExerciseCard = ({ item }: { item: Exercise }) => (
     <TouchableOpacity
       style={styles(theme).card}
-      onPress={() => router.push({ pathname: '/exercise-detail', params: { exercise: JSON.stringify(item) } })}
+      onPress={() => navigation.navigate('ExerciseDetail', { exercise: item })}
       activeOpacity={0.7}
     >
       <View style={styles(theme).cardHeader}>

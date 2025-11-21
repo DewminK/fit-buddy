@@ -1,24 +1,60 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import { Provider } from 'react-redux';
+import { store } from '../store';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { loadUser } from '../store/slices/authSlice';
+import { loadFavorites } from '../store/slices/favoritesSlice';
+import { loadTheme } from '../store/slices/themeSlice';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+function RootLayoutNav() {
+  const router = useRouter();
+  const segments = useSegments();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const isDark = useAppSelector((state) => state.theme.isDark);
+  const [isNavigationReady, setIsNavigationReady] = useState(false);
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+  useEffect(() => {
+    // Load persisted data
+    const loadData = async () => {
+      await dispatch(loadUser());
+      await dispatch(loadFavorites());
+      await dispatch(loadTheme());
+      setIsNavigationReady(true);
+    };
+    loadData();
+  }, []);
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  useEffect(() => {
+    if (!isNavigationReady) return;
+
+    const inAuthGroup = segments[0] === 'auth';
+
+    setTimeout(() => {
+      if (!isAuthenticated && !inAuthGroup) {
+        router.replace('/auth/login');
+      } else if (isAuthenticated && inAuthGroup) {
+        router.replace('/(tabs)');
+      }
+    }, 1);
+  }, [isAuthenticated, segments, isNavigationReady]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <Slot />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <Provider store={store}>
+      <RootLayoutNav />
+    </Provider>
   );
 }
