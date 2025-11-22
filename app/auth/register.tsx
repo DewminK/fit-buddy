@@ -9,11 +9,12 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFormik } from 'formik';
 import { useRouter } from 'expo-router';
+import CustomModal from '../../components/CustomModal';
+import { useCustomModal } from '../../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { register } from '../../store/slices/authSlice';
 import { registerSchema } from '../../utils/validation';
@@ -25,6 +26,7 @@ export default function RegisterScreen() {
   const { isLoading } = useAppSelector((state: any) => state.auth);
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const theme = isDark ? darkTheme : lightTheme;
+  const { modalConfig, hideModal, showSuccess, showError } = useCustomModal();
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,9 +50,10 @@ export default function RegisterScreen() {
           email: values.email,
           password: values.password,
         })).unwrap();
-        Alert.alert('Success', 'Account created successfully!');
-      } catch (err) {
-        Alert.alert('Registration Failed', 'Please try again');
+        showSuccess('Success', 'Account created successfully! You can now login with your credentials.');
+      } catch (err: any) {
+        const errorMessage = err?.message || 'Please try again';
+        showError('Registration Failed', errorMessage);
       }
     },
   });
@@ -225,6 +228,18 @@ export default function RegisterScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <CustomModal
+        visible={modalConfig.visible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={hideModal}
+        onConfirm={modalConfig.onConfirm}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        isDark={isDark}
+      />
     </KeyboardAvoidingView>
   );
 }

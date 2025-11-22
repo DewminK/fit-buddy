@@ -63,15 +63,20 @@ export default function AppHeader({
       <View style={styles.topRow}>
         {/* Left side - Back button or Logo */}
         <View style={styles.leftSection}>
-          {showBackButton ? (
-            <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-              <Feather name="arrow-left" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.logoContainer}>
-              <Feather name="activity" size={28} color={theme.colors.primary} />
+            <TouchableOpacity
+            onPress={handleThemeToggle}
+            style={styles.themeToggle}
+            activeOpacity={0.7}
+          >
+            <View style={styles.toggleContainer}>
+              <Animated.View style={[styles.iconContainer, sunStyle]}>
+                <Feather name="sun" size={20} color={theme.colors.primary} />
+              </Animated.View>
+              <Animated.View style={[styles.iconContainer, moonStyle]}>
+                <Feather name="moon" size={20} color={theme.colors.primary} />
+              </Animated.View>
             </View>
-          )}
+          </TouchableOpacity>
         </View>
 
         {/* Center - Title or User info */}
@@ -83,7 +88,7 @@ export default function AppHeader({
             </View>
           ) : user ? (
             <View>
-              <Text style={styles.greeting}>Hello, {user.firstName}! 👋</Text>
+              <Text style={styles.greeting}>Hello, {user.firstName}</Text>
               <Text style={styles.subtitle}>Ready to workout?</Text>
             </View>
           ) : null}
@@ -108,20 +113,6 @@ export default function AppHeader({
               )}
             </TouchableOpacity>
           )}
-          <TouchableOpacity
-            onPress={handleThemeToggle}
-            style={styles.themeToggle}
-            activeOpacity={0.7}
-          >
-            <View style={styles.toggleContainer}>
-              <Animated.View style={[styles.iconContainer, sunStyle]}>
-                <Feather name="sun" size={20} color={theme.colors.primary} />
-              </Animated.View>
-              <Animated.View style={[styles.iconContainer, moonStyle]}>
-                <Feather name="moon" size={20} color={theme.colors.primary} />
-              </Animated.View>
-            </View>
-          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -144,33 +135,37 @@ const createStyles = (theme: typeof lightTheme) =>
     topRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       paddingHorizontal: theme.spacing.lg,
-      minHeight: 50,
+      minHeight: 56,
+      paddingVertical: theme.spacing.sm,
     },
     leftSection: {
-      minWidth: 50,
+      width: 80,
       justifyContent: 'center',
+      alignItems: 'flex-start',
     },
     centerSection: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.md,
     },
     rightSection: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.spacing.xs,
-      minWidth: 90,
+      gap: theme.spacing.sm,
+      width: 80,
       justifyContent: 'flex-end',
     },
     backButton: {
-      padding: theme.spacing.xs,
+      padding: theme.spacing.sm,
+      marginLeft: -theme.spacing.sm,
     },
     logoContainer: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
       backgroundColor: theme.colors.primary + '15',
       justifyContent: 'center',
       alignItems: 'center',
@@ -180,34 +175,40 @@ const createStyles = (theme: typeof lightTheme) =>
       fontWeight: '700',
       color: theme.colors.text,
       textAlign: 'center',
+      lineHeight: 24,
     },
     subtitle: {
       fontSize: theme.fontSize.sm,
       color: theme.colors.textSecondary,
       textAlign: 'center',
-      marginTop: 2,
+      marginTop: 4,
+      lineHeight: 18,
     },
     greeting: {
       fontSize: theme.fontSize.lg,
       fontWeight: '600',
       color: theme.colors.text,
       textAlign: 'center',
+      lineHeight: 22,
     },
     notificationButton: {
-      padding: theme.spacing.xs,
+      padding: theme.spacing.sm,
       position: 'relative',
+      marginRight: -theme.spacing.xs,
     },
     badge: {
       position: 'absolute',
-      top: 4,
-      right: 4,
+      top: 6,
+      right: 6,
       backgroundColor: theme.colors.error,
       borderRadius: 10,
-      minWidth: 16,
-      height: 16,
+      minWidth: 18,
+      height: 18,
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 4,
+      borderWidth: 2,
+      borderColor: theme.colors.background,
     },
     badgeText: {
       color: '#FFFFFF',
@@ -215,19 +216,25 @@ const createStyles = (theme: typeof lightTheme) =>
       fontWeight: '700',
     },
     themeToggle: {
-      padding: theme.spacing.xs,
+      padding: theme.spacing.sm,
+      marginRight: -theme.spacing.sm,
     },
     toggleContainer: {
       flexDirection: 'row',
       backgroundColor: theme.colors.surface,
       borderRadius: 50,
-      padding: theme.spacing.xs,
+      padding: 4,
       borderWidth: 1,
       borderColor: theme.colors.border,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 1,
     },
     iconContainer: {
-      width: 28,
-      height: 28,
+      width: 30,
+      height: 30,
       justifyContent: 'center',
       alignItems: 'center',
     },

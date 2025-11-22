@@ -9,7 +9,8 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
@@ -45,13 +46,22 @@ export default function HomeScreen() {
   }, []);
 
   const loadExercises = async () => {
-    await dispatch(fetchExercises({}));
+    try {
+      await dispatch(fetchExercises({}));
+    } catch (error) {
+      console.error('Failed to load exercises:', error);
+    }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadExercises();
-    setRefreshing(false);
+    try {
+      await loadExercises();
+    } catch (error) {
+      console.error('Failed to refresh exercises:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleFilterMuscle = (muscle: string) => {

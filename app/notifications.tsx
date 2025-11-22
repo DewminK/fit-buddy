@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-    Alert,
     FlatList,
     StyleSheet,
     Text,
@@ -10,6 +9,8 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomModal from '../components/CustomModal';
+import { useCustomModal } from '../hooks/useCustomModal';
 import { darkTheme, lightTheme } from '../constants/themes';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { clearAllNotifications, deleteNotification, markAllAsRead, markAsRead } from '../store/slices/notificationsSlice';
@@ -20,6 +21,7 @@ export default function NotificationsScreen() {
   const { notifications, unreadCount } = useAppSelector((state) => state.notifications);
   const isDark = useAppSelector((state) => state.theme.isDark);
   const theme = isDark ? darkTheme : lightTheme;
+  const { modalConfig, hideModal, showConfirm } = useCustomModal();
 
   const handleMarkAsRead = (id: string) => {
     dispatch(markAsRead(id));
@@ -37,17 +39,12 @@ export default function NotificationsScreen() {
 
   const handleClearAll = () => {
     if (notifications.length > 0) {
-      Alert.alert(
+      showConfirm(
         'Clear All Notifications',
-        'Are you sure you want to delete all notifications?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Clear All',
-            style: 'destructive',
-            onPress: () => dispatch(clearAllNotifications()),
-          },
-        ]
+        'Are you sure you want to delete all notifications? This action cannot be undone.',
+        () => dispatch(clearAllNotifications()),
+        'Clear All',
+        'Cancel'
       );
     }
   };
@@ -174,6 +171,18 @@ export default function NotificationsScreen() {
           contentContainerStyle={styles(theme).listContent}
         />
       )}
+
+      <CustomModal
+        visible={modalConfig.visible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={hideModal}
+        onConfirm={modalConfig.onConfirm}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        isDark={isDark}
+      />
     </SafeAreaView>
   );
 }
@@ -312,3 +321,6 @@ const createStyles = (theme: typeof lightTheme) =>
       textAlign: 'center',
     },
   });
+
+// Add CustomModal before closing component
+// This should be added in the return statement before </SafeAreaView>

@@ -34,17 +34,18 @@ export const login = createAsyncThunk(
   'auth/login',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
-      console.log('🔐 Attempting login for:', username);
+      if (__DEV__) console.log('🔐 Attempting login for:', username);
       const response = await authAPI.login(username, password);
       
       // Store token and user data securely
       await secureStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
       await secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response));
       
-      console.log('✅ Login successful:', response.firstName, response.lastName);
+      if (__DEV__) console.log('✅ Login successful:', response.firstName, response.lastName);
       return response;
     } catch (error: any) {
-      console.error('❌ Login failed:', error.message);
+      // Only log in development, prevent red box in production
+      if (__DEV__) console.error('❌ Login failed:', error.message);
       return rejectWithValue(error.message || 'Login failed');
     }
   }
@@ -54,17 +55,18 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData: { username: string; email: string; password: string; firstName: string; lastName: string }, { rejectWithValue }) => {
     try {
-      console.log('📝 Attempting registration for:', userData.username);
+      if (__DEV__) console.log('📝 Attempting registration for:', userData.username);
       const response = await authAPI.register(userData);
       
       // Store token and user data securely
       await secureStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
       await secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response));
       
-      console.log('✅ Registration successful:', response.firstName, response.lastName);
+      if (__DEV__) console.log('✅ Registration successful:', response.firstName, response.lastName);
       return response;
     } catch (error: any) {
-      console.error('❌ Registration failed:', error.message);
+      // Only log in development, prevent red box in production
+      if (__DEV__) console.error('❌ Registration failed:', error.message);
       return rejectWithValue(error.message || 'Registration failed');
     }
   }
@@ -77,13 +79,14 @@ export const loadUser = createAsyncThunk(
       const userData = await secureStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (userData) {
         const user = JSON.parse(userData);
-        console.log('✅ User loaded from storage:', user.username);
+        if (__DEV__) console.log('✅ User loaded from storage:', user.username);
         return user;
       }
-      console.log('ℹ️ No user data found in storage');
+      if (__DEV__) console.log('ℹ️ No user data found in storage');
       return null;
     } catch (error: any) {
-      console.error('❌ Error loading user:', error.message);
+      // Only log in development, prevent red box in production
+      if (__DEV__) console.error('❌ Error loading user:', error.message);
       return rejectWithValue(error.message);
     }
   }
@@ -92,10 +95,10 @@ export const loadUser = createAsyncThunk(
 export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
-    console.log('👋 Logging out...');
+    if (__DEV__) console.log('👋 Logging out...');
     await secureStorage.removeItem(STORAGE_KEYS.USER_TOKEN);
     await secureStorage.removeItem(STORAGE_KEYS.USER_DATA);
-    console.log('✅ Logout complete');
+    if (__DEV__) console.log('✅ Logout complete');
   }
 );
 

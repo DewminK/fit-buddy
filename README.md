@@ -67,6 +67,18 @@ FitBuddy is a comprehensive mobile fitness application built with **React Native
   - API Ninjas for exercise data (optional)
 - **Responsive Design**: Adapts to various screen sizes
 - **Type Safety**: Full TypeScript implementation
+- **Error Handling**: 
+  - Global React Error Boundary for graceful error recovery
+  - Try-catch blocks protecting async operations
+  - User-friendly error messages with retry functionality
+  - Automatic fallback UI when components crash
+  - Production-ready error suppression (no red boxes in release builds)
+- **Custom Modals**:
+  - Beautiful animated modal system replacing native alerts
+  - Consistent design across all dialogs
+  - Type-specific styling (success, error, warning, info, confirm)
+  - Dark mode support with smooth animations
+  - Spring physics for natural feel
 
 ## 🚀 Getting Started
 

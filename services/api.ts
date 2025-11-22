@@ -10,10 +10,12 @@ const AUTH_API_BASE = process.env.EXPO_PUBLIC_AUTH_API_BASE || 'https://dummyjso
 const REGISTERED_USERS_KEY = 'fitbuddy_registered_users';
 
 // Log configuration status (without exposing the key)
-if (!FITNESS_API_KEY) {
-  console.warn('⚠️ FITNESS_API_KEY not found in environment variables. Using mock data.');
-} else {
-  console.log('✅ API configuration loaded successfully');
+if (__DEV__) {
+  if (!FITNESS_API_KEY) {
+    console.warn('⚠️ FITNESS_API_KEY not found in environment variables. Using mock data.');
+  } else {
+    console.log('✅ API configuration loaded successfully');
+  }
 }
 
 // Create axios instances
@@ -36,7 +38,7 @@ const getRegisteredUsers = async (): Promise<any[]> => {
     const usersJson = await AsyncStorage.getItem(REGISTERED_USERS_KEY);
     return usersJson ? JSON.parse(usersJson) : [];
   } catch (error) {
-    console.error('Error reading registered users:', error);
+    if (__DEV__) console.error('Error reading registered users:', error);
     return [];
   }
 };
@@ -46,9 +48,9 @@ const saveRegisteredUser = async (user: any): Promise<void> => {
     const users = await getRegisteredUsers();
     users.push(user);
     await AsyncStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
-    console.log('✅ User registered successfully:', user.username);
+    if (__DEV__) console.log('✅ User registered successfully:', user.username);
   } catch (error) {
-    console.error('Error saving registered user:', error);
+    if (__DEV__) console.error('Error saving registered user:', error);
     throw error;
   }
 };
@@ -61,7 +63,7 @@ const findUserByCredentials = async (username: string, password: string): Promis
     );
     return user || null;
   } catch (error) {
-    console.error('Error finding user:', error);
+    if (__DEV__) console.error('Error finding user:', error);
     return null;
   }
 };
@@ -69,13 +71,13 @@ const findUserByCredentials = async (username: string, password: string): Promis
 // Auth API
 export const authAPI = {
   login: async (username: string, password: string) => {
-    console.log('🔐 Attempting login for:', username);
+    if (__DEV__) console.log('🔐 Attempting login for:', username);
     
     // First, try to find user in local registered users
     const localUser = await findUserByCredentials(username, password);
     
     if (localUser) {
-      console.log('✅ Login successful with local user:', localUser.username);
+      if (__DEV__) console.log('✅ Login successful with local user:', localUser.username);
       // Return user data without password
       const { password: _, ...userWithoutPassword } = localUser;
       return {
@@ -86,15 +88,15 @@ export const authAPI = {
     
     // If not found locally, try DummyJSON API (for demo users like "emilys")
     try {
-      console.log('🔄 Trying DummyJSON API for demo user...');
+      if (__DEV__) console.log('🔄 Trying DummyJSON API for demo user...');
       const response = await authAxios.post('/auth/login', {
         username,
         password,
       });
-      console.log('✅ Login successful with DummyJSON demo user');
+      if (__DEV__) console.log('✅ Login successful with DummyJSON demo user');
       return response.data;
     } catch (error) {
-      console.log('❌ Login failed - user not found in local storage or DummyJSON');
+      if (__DEV__) console.log('❌ Login failed - user not found in local storage or DummyJSON');
       throw new Error('Invalid username or password. Please check your credentials or sign up for a new account.');
     }
   },
@@ -106,7 +108,7 @@ export const authAPI = {
     firstName: string;
     lastName: string;
   }) => {
-    console.log('📝 Attempting registration for:', userData.username);
+    if (__DEV__) console.log('📝 Attempting registration for:', userData.username);
     
     // Check if username already exists
     const users = await getRegisteredUsers();
@@ -115,7 +117,7 @@ export const authAPI = {
     );
     
     if (existingUser) {
-      console.log('❌ Registration failed - username already exists');
+      if (__DEV__) console.log('❌ Registration failed - username already exists');
       throw new Error('Username already taken. Please choose a different username.');
     }
     
@@ -125,7 +127,7 @@ export const authAPI = {
     );
     
     if (existingEmail) {
-      console.log('❌ Registration failed - email already exists');
+      if (__DEV__) console.log('❌ Registration failed - email already exists');
       throw new Error('Email already registered. Please use a different email or login.');
     }
     
@@ -155,50 +157,73 @@ export const authAPI = {
 // Exercise API
 export const exerciseAPI = {
   getExercises: async (muscle: string = '', difficulty: string = '') => {
-    // If no API key, use mock data directly
+    // Require API key, no fallback to mock data
     if (!FITNESS_API_KEY) {
-      console.log('📦 Using mock data - API key not configured');
-      return getMockExercises(muscle, difficulty);
+      throw new Error('API key not configured. Please add EXPO_PUBLIC_FITNESS_API_KEY to your .env file');
     }
 
     try {
-      // Build query parameters
+      // If user wants all exercises, fetch from multiple muscle groups for variety
+      if (!muscle || muscle === 'all') {
+        const muscleGroups = ['chest', 'biceps', 'triceps', 'shoulders', 'quadriceps', 'abdominals', 'lats'];
+        const allExercises: any[] = [];
+        
+        // Fetch exercises from multiple muscle groups
+        for (const muscleGroup of muscleGroups) {
+          const params: any = { muscle: muscleGroup };
+          if (difficulty && difficulty !== 'all') params.difficulty = difficulty;
+          
+          try {
+            const response = await fitnessAPI.get('/exercises', { params });
+            // Add exercises from this muscle group (limit to 5 per group for variety)
+            allExercises.push(...response.data.slice(0, 5));
+          } catch (err) {
+            // Continue with other muscle groups if one fails
+            if (__DEV__) console.log(`⚠️ Failed to fetch ${muscleGroup}:`, err);
+          }
+        }
+        
+        if (__DEV__) console.log('✅ Fetched exercises from multiple muscle groups:', allExercises.length, 'total');
+        return allExercises;
+      }
+      
+      // Fetch specific muscle group
       const params: any = {};
       if (muscle && muscle !== 'all') params.muscle = muscle;
       if (difficulty && difficulty !== 'all') params.difficulty = difficulty;
-      
-      // If no specific params, get exercises for common muscles
-      if (!muscle || muscle === 'all') {
-        params.muscle = 'biceps';
-      }
 
-      console.log('🔄 Fetching exercises from API...', params);
+      if (__DEV__) console.log('🔄 Fetching exercises from API...', params);
       const response = await fitnessAPI.get('/exercises', { params });
       
-      console.log('✅ API response received:', response.data.length, 'exercises');
+      if (__DEV__) console.log('✅ API response received:', response.data.length, 'exercises');
       return response.data;
     } catch (error: any) {
-      console.log('⚠️ API error, falling back to mock data:', error.message);
-      
-      // Check for specific error types
-      if (error.response) {
-        console.log('API Error Status:', error.response.status);
-        if (error.response.status === 401 || error.response.status === 403) {
-          console.log('❌ Invalid API key. Please check your EXPO_PUBLIC_FITNESS_API_KEY in .env file');
+      if (__DEV__) {
+        console.error('❌ API error:', error.message);
+        if (error.response) {
+          console.log('API Error Status:', error.response.status);
+          if (error.response.status === 401 || error.response.status === 403) {
+            console.log('❌ Invalid API key. Please check your EXPO_PUBLIC_FITNESS_API_KEY in .env file');
+          }
         }
       }
-      
-      return getMockExercises(muscle, difficulty);
+      throw error; // Throw error instead of falling back to mock data
     }
   },
 
   searchExercises: async (searchTerm: string) => {
-    const allExercises = getMockExercises('', '');
-    return allExercises.filter(exercise => 
-      exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exercise.muscle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exercise.type.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    try {
+      // Fetch all exercises and filter by search term
+      const allExercises = await exerciseAPI.getExercises();
+      return allExercises.filter((exercise: any) => 
+        exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exercise.muscle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exercise.type.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    } catch (error) {
+      if (__DEV__) console.error('Search error:', error);
+      return [];
+    }
   },
 };
 

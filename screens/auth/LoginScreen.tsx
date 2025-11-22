@@ -124,16 +124,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               )}
             </TouchableOpacity>
 
-            {/* Demo Credentials */}
-            <View style={styles.demoContainer}>
-              <Text style={styles.demoText}>📌 Demo Credentials (Optional):</Text>
-              <Text style={styles.demoCredentials}>Username: emilys</Text>
-              <Text style={styles.demoCredentials}>Password: emilyspass</Text>
-              <Text style={[styles.demoCredentials, { marginTop: 8, fontSize: 11 }]}>
-                Or create your own account below! ⬇️
-              </Text>
-            </View>
-
             {/* Register Link */}
             <TouchableOpacity
               style={styles.linkContainer}

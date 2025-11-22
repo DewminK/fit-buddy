@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-    Alert,
     ScrollView,
     StyleSheet,
     Text,
@@ -11,6 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
+import CustomModal from '../../components/CustomModal';
+import { useCustomModal } from '../../hooks/useCustomModal';
 import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
@@ -22,22 +23,18 @@ export default function ProfileScreen() {
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const favorites = useAppSelector((state: any) => state.favorites.favorites);
   const theme = isDark ? darkTheme : lightTheme;
+  const { modalConfig, hideModal, showConfirm, showInfo } = useCustomModal();
 
   const handleLogout = () => {
-    Alert.alert(
+    showConfirm(
       'Logout',
       'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await dispatch(logout());
-            router.replace('/auth/login');
-          },
-        },
-      ]
+      async () => {
+        await dispatch(logout());
+        router.replace('/auth/login');
+      },
+      'Logout',
+      'Cancel'
     );
   };
 
@@ -95,7 +92,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity 
           style={styles(theme).settingCard}
-          onPress={() => Alert.alert('Privacy', 'Privacy settings coming soon!')}
+          onPress={() => showInfo('Privacy', 'Privacy settings coming soon!')}
           activeOpacity={0.7}
         >
           <View style={styles(theme).settingLeft}>
@@ -124,7 +121,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity 
           style={styles(theme).settingCard}
-          onPress={() => Alert.alert('Help & Support', 'Need help? Email us at support@fitbuddy.com')}
+          onPress={() => showInfo('Help & Support', 'Need help? Email us at support@fitbuddy.com')}
           activeOpacity={0.7}
         >
           <View style={styles(theme).settingLeft}>
@@ -136,7 +133,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity 
           style={styles(theme).settingCard}
-          onPress={() => Alert.alert('FitBuddy', 'Version 1.0.0\n\nYour personal fitness companion\n\n© 2025 FitBuddy')}
+          onPress={() => showInfo('FitBuddy', 'Version 1.0.0\n\nYour personal fitness companion\n\n© 2025 FitBuddy')}
           activeOpacity={0.7}
         >
           <View style={styles(theme).settingLeft}>
@@ -160,6 +157,18 @@ export default function ProfileScreen() {
       {/* App Version */}
       <Text style={styles(theme).version}>FitBuddy v1.0.0</Text>
       </ScrollView>
+
+      <CustomModal
+        visible={modalConfig.visible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={hideModal}
+        onConfirm={modalConfig.onConfirm}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        isDark={isDark}
+      />
     </SafeAreaView>
   );
 }
