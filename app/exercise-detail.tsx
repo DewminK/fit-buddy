@@ -2,15 +2,16 @@ import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomModal from '../components/CustomModal';
 import { darkTheme, getDifficultyColor, getMuscleIcon, lightTheme } from '../constants/themes';
+import { useCustomModal } from '../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { Exercise } from '../store/slices/exercisesSlice';
 import { toggleFavorite } from '../store/slices/favoritesSlice';
@@ -24,6 +25,7 @@ export default function ExerciseDetailScreen() {
   const favorites = useAppSelector((state: any) => state.favorites.favorites);
   const currentWorkout = useAppSelector((state: any) => state.workouts.currentWorkout);
   const theme = isDark ? darkTheme : lightTheme;
+  const { modalConfig, showWarning, showConfirm, hideModal } = useCustomModal();
 
   const exercise: Exercise = params.exercise ? JSON.parse(params.exercise as string) : null;
 
@@ -44,20 +46,21 @@ export default function ExerciseDetailScreen() {
 
   const handleAddToWorkout = () => {
     if (isInWorkout) {
-      Alert.alert(
+      showWarning(
         'Already Added',
-        'This exercise is already in your current workout.',
-        [{ text: 'OK' }]
+        'This exercise is already in your current workout.'
       );
     } else {
       dispatch(addExerciseToWorkout(exercise));
-      Alert.alert(
+      showConfirm(
         'Success! 🎉',
         `${exercise.name} added to your workout.`,
-        [
-          { text: 'Continue', style: 'cancel' },
-          { text: 'View Workout', onPress: () => router.push('/(tabs)/profile') },
-        ]
+        () => {
+          hideModal();
+          router.push('/(tabs)/profile');
+        },
+        'View Workout',
+        'Continue'
       );
     }
   };
@@ -187,6 +190,8 @@ export default function ExerciseDetailScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <CustomModal {...modalConfig} />
     </SafeAreaView>
   );
 }

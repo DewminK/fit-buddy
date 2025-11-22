@@ -2,16 +2,16 @@ import { Feather } from '@expo/vector-icons';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -219,24 +219,6 @@ const createStyles = (theme: typeof lightTheme) =>
       color: '#FFFFFF',
       fontSize: theme.fontSize.lg,
       fontWeight: theme.fontWeight.semibold,
-    },
-    demoContainer: {
-      marginTop: theme.spacing.lg,
-      padding: theme.spacing.md,
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      borderLeftWidth: 3,
-      borderLeftColor: theme.colors.info,
-    },
-    demoText: {
-      fontSize: theme.fontSize.sm,
-      fontWeight: theme.fontWeight.semibold,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.xs,
-    },
-    demoCredentials: {
-      fontSize: theme.fontSize.sm,
-      color: theme.colors.textSecondary,
     },
     linkContainer: {
       marginTop: theme.spacing.lg,

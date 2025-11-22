@@ -2,16 +2,16 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomModal from '../components/CustomModal';
-import { useCustomModal } from '../hooks/useCustomModal';
 import { darkTheme, lightTheme } from '../constants/themes';
+import { useCustomModal } from '../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { clearAllNotifications, deleteNotification, markAllAsRead, markAsRead } from '../store/slices/notificationsSlice';
 

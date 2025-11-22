@@ -2,18 +2,17 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    Animated,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomModal from '../components/CustomModal';
-import { useCustomModal } from '../hooks/useCustomModal';
 import { darkTheme, lightTheme } from '../constants/themes';
+import { useCustomModal } from '../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { updateUser } from '../store/slices/authSlice';
 

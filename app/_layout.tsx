@@ -6,6 +6,7 @@ import { LogBox } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { store } from '../store';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loadUser } from '../store/slices/authSlice';
@@ -14,7 +15,6 @@ import { loadNotifications } from '../store/slices/notificationsSlice';
 import { loadTheme } from '../store/slices/themeSlice';
 import { loadWaterData } from '../store/slices/waterSlice';
 import { loadWorkouts } from '../store/slices/workoutsSlice';
-import ErrorBoundary from '../components/ErrorBoundary';
 
 // Suppress yellow box warnings in production
 if (!__DEV__) {

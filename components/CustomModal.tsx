@@ -1,15 +1,15 @@
+import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Dimensions,
-  Pressable,
+    Animated,
+    Dimensions,
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 

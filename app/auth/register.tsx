@@ -1,24 +1,24 @@
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { useFormik } from 'formik';
-import { useRouter } from 'expo-router';
 import CustomModal from '../../components/CustomModal';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useCustomModal } from '../../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { register } from '../../store/slices/authSlice';
 import { registerSchema } from '../../utils/validation';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 export default function RegisterScreen() {
   const router = useRouter();

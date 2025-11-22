@@ -7,6 +7,7 @@ interface ModalConfig {
   type: ModalType;
   title: string;
   message: string;
+  onClose: () => void;
   onConfirm?: () => void;
   confirmText?: string;
   cancelText?: string;
@@ -17,6 +18,7 @@ const initialState: ModalConfig = {
   type: 'info',
   title: '',
   message: '',
+  onClose: () => {},
   onConfirm: undefined,
   confirmText: 'OK',
   cancelText: 'Cancel',
@@ -25,15 +27,16 @@ const initialState: ModalConfig = {
 export function useCustomModal() {
   const [modalConfig, setModalConfig] = useState<ModalConfig>(initialState);
 
-  const showModal = (config: Omit<ModalConfig, 'visible'>) => {
+  const hideModal = () => {
+    setModalConfig(initialState);
+  };
+
+  const showModal = (config: Omit<ModalConfig, 'visible' | 'onClose'>) => {
     setModalConfig({
       ...config,
       visible: true,
+      onClose: hideModal,
     });
-  };
-
-  const hideModal = () => {
-    setModalConfig(initialState);
   };
 
   const showSuccess = (title: string, message: string, onConfirm?: () => void) => {
