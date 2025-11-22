@@ -1,15 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-// Get environment variables from Expo's environment
+
 const FITNESS_API_BASE = process.env.EXPO_PUBLIC_FITNESS_API_BASE || 'https://api.api-ninjas.com/v1';
 const FITNESS_API_KEY = process.env.EXPO_PUBLIC_FITNESS_API_KEY || '';
 const AUTH_API_BASE = process.env.EXPO_PUBLIC_AUTH_API_BASE || 'https://dummyjson.com';
 
-// Storage key for registered users
 const REGISTERED_USERS_KEY = 'fitbuddy_registered_users';
 
-// Log configuration status (without exposing the key)
 if (__DEV__) {
   if (!FITNESS_API_KEY) {
     console.warn('⚠️ FITNESS_API_KEY not found in environment variables. Using mock data.');
@@ -32,7 +30,7 @@ const authAxios = axios.create({
   timeout: 10000,
 });
 
-// Local user storage helper functions
+
 const getRegisteredUsers = async (): Promise<any[]> => {
   try {
     const usersJson = await AsyncStorage.getItem(REGISTERED_USERS_KEY);
