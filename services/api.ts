@@ -1,6 +1,5 @@
-import axios from 'axios';
-import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 // Get environment variables from Expo's environment
 const FITNESS_API_BASE = process.env.EXPO_PUBLIC_FITNESS_API_BASE || 'https://api.api-ninjas.com/v1';

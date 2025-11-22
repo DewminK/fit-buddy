@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFormik } from 'formik';
+import React, { useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/slices/authSlice';
 import { loginSchema } from '../../utils/validation';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 interface LoginScreenProps {
   navigation: any;

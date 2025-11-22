@@ -1,19 +1,19 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AppHeader from '../../components/AppHeader';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
-import { lightTheme, darkTheme } from '../../constants/themes';
-import AppHeader from '../../components/AppHeader';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -81,7 +81,11 @@ export default function ProfileScreen() {
       <View style={styles(theme).section}>
         <Text style={styles(theme).sectionTitle}>Settings</Text>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => router.push('/notifications')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="bell" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Notifications</Text>
@@ -89,7 +93,11 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => Alert.alert('Privacy', 'Privacy settings coming soon!')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="lock" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Privacy</Text>
@@ -102,7 +110,11 @@ export default function ProfileScreen() {
       <View style={styles(theme).section}>
         <Text style={styles(theme).sectionTitle}>Account</Text>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => router.push('/edit-profile')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="edit" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Edit Profile</Text>
@@ -110,7 +122,11 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => Alert.alert('Help & Support', 'Need help? Email us at support@fitbuddy.com')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="help-circle" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Help & Support</Text>
@@ -118,7 +134,11 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => Alert.alert('FitBuddy', 'Version 1.0.0\n\nYour personal fitness companion\n\n© 2025 FitBuddy')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="info" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>About</Text>

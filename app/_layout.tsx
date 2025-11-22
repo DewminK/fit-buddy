@@ -3,12 +3,13 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
-import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
 import { store } from '../store';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loadUser } from '../store/slices/authSlice';
 import { loadFavorites } from '../store/slices/favoritesSlice';
+import { loadNotifications } from '../store/slices/notificationsSlice';
 import { loadTheme } from '../store/slices/themeSlice';
 import { loadWaterData } from '../store/slices/waterSlice';
 import { loadWorkouts } from '../store/slices/workoutsSlice';
@@ -34,6 +35,12 @@ function RootLayoutNav() {
       const storedWorkout = await AsyncStorage.getItem('fitbuddy_workouts');
       if (storedWorkout) {
         dispatch(loadWorkouts(JSON.parse(storedWorkout)));
+      }
+      
+      // Load notifications from AsyncStorage
+      const storedNotifications = await AsyncStorage.getItem('fitbuddy_notifications');
+      if (storedNotifications) {
+        dispatch(loadNotifications(JSON.parse(storedNotifications)));
       }
       
       setIsNavigationReady(true);

@@ -1,20 +1,20 @@
+import { Feather } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { darkTheme, getDifficultyColor, getMuscleIcon, lightTheme } from '../constants/themes';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { Exercise } from '../store/slices/exercisesSlice';
 import { toggleFavorite } from '../store/slices/favoritesSlice';
 import { addExerciseToWorkout } from '../store/slices/workoutsSlice';
-import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../constants/themes';
-import { Exercise } from '../store/slices/exercisesSlice';
 
 export default function ExerciseDetailScreen() {
   const router = useRouter();

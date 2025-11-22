@@ -1,8 +1,8 @@
+import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Feather } from '@expo/vector-icons';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppSelector } from '../../store/hooks';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 export default function TabLayout() {
   const isDark = useAppSelector((state) => state.theme.isDark);

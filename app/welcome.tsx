@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withRepeat,
-  withSequence,
-  withTiming,
-  Easing,
+    Easing,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from 'react-native-reanimated';
+import { darkTheme, lightTheme } from '../constants/themes';
 import { useAppSelector } from '../store/hooks';
-import { lightTheme, darkTheme } from '../constants/themes';
 
 const { width } = Dimensions.get('window');
 

@@ -1,19 +1,19 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { toggleFavorite } from '../../store/slices/favoritesSlice';
-import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../../constants/themes';
-import { Exercise } from '../../store/slices/exercisesSlice';
+import React from 'react';
+import {
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
+import { darkTheme, getDifficultyColor, getMuscleIcon, lightTheme } from '../../constants/themes';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { Exercise } from '../../store/slices/exercisesSlice';
+import { toggleFavorite } from '../../store/slices/favoritesSlice';
 
 export default function FavoritesScreen() {
   const router = useRouter();

@@ -1,19 +1,20 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import React, { useEffect } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  Easing,
-  interpolate,
-  withRepeat,
-  withSequence,
+    Easing,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
+    withDelay,
 } from 'react-native-reanimated';
+import { darkTheme, lightTheme } from '../constants/themes';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { addWaterIntake, removeLastWaterIntake, loadWaterData } from '../store/slices/waterSlice';
-import { lightTheme, darkTheme } from '../constants/themes';
+import { addWaterIntake, loadWaterData, removeLastWaterIntake } from '../store/slices/waterSlice';
 
 const WATER_AMOUNTS = [250, 500, 750, 1000]; // ml
 
@@ -26,6 +27,10 @@ export default function WaterTracker() {
   const waterLevel = useSharedValue(0);
   const waveAnimation = useSharedValue(0);
   const rippleScale = useSharedValue(1);
+  const bubble1Y = useSharedValue(0);
+  const bubble2Y = useSharedValue(0);
+  const bubble3Y = useSharedValue(0);
+  const glassScale = useSharedValue(1);
 
   useEffect(() => {
     dispatch(loadWaterData());
@@ -48,6 +53,36 @@ export default function WaterTracker() {
       -1,
       true
     );
+
+    // Bubble animations
+    if (percentage > 0) {
+      bubble1Y.value = withRepeat(
+        withSequence(
+          withTiming(-250, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 0 })
+        ),
+        -1,
+        false
+      );
+      
+      bubble2Y.value = withRepeat(
+        withSequence(
+          withDelay(800, withTiming(-250, { duration: 3500, easing: Easing.inOut(Easing.ease) })),
+          withTiming(0, { duration: 0 })
+        ),
+        -1,
+        false
+      );
+      
+      bubble3Y.value = withRepeat(
+        withSequence(
+          withDelay(1500, withTiming(-250, { duration: 2800, easing: Easing.inOut(Easing.ease) })),
+          withTiming(0, { duration: 0 })
+        ),
+        -1,
+        false
+      );
+    }
   }, [today.amount, dailyGoal]);
 
   const handleAddWater = (amount: number) => {
@@ -56,6 +91,12 @@ export default function WaterTracker() {
     rippleScale.value = withSequence(
       withTiming(1.5, { duration: 600 }),
       withTiming(0, { duration: 0 })
+    );
+
+    // Trigger glass scale animation
+    glassScale.value = withSequence(
+      withSpring(1.05, { damping: 10, stiffness: 100 }),
+      withSpring(1, { damping: 10, stiffness: 100 })
     );
 
     dispatch(addWaterIntake(amount));
@@ -90,6 +131,33 @@ export default function WaterTracker() {
     };
   });
 
+  const glassAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: glassScale.value }],
+    };
+  });
+
+  const bubble1Style = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: bubble1Y.value }],
+      opacity: interpolate(bubble1Y.value, [0, -125, -250], [1, 0.7, 0]),
+    };
+  });
+
+  const bubble2Style = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: bubble2Y.value }],
+      opacity: interpolate(bubble2Y.value, [0, -125, -250], [1, 0.7, 0]),
+    };
+  });
+
+  const bubble3Style = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: bubble3Y.value }],
+      opacity: interpolate(bubble3Y.value, [0, -125, -250], [1, 0.7, 0]),
+    };
+  });
+
   const percentage = Math.round((today.amount / dailyGoal) * 100);
   const remainingAmount = Math.max(dailyGoal - today.amount, 0);
 
@@ -107,11 +175,20 @@ export default function WaterTracker() {
 
       {/* Water Glass Visualization */}
       <View style={styles.glassContainer}>
-        <View style={styles.glass}>
+        <Animated.View style={[styles.glass, glassAnimatedStyle]}>
           <Animated.View style={[styles.ripple, rippleStyle]} />
           
           <Animated.View style={[styles.waterFill, waterLevelStyle, waveStyle]}>
             <View style={styles.waveTop} />
+            
+            {/* Animated Bubbles */}
+            {percentage > 0 && (
+              <>
+                <Animated.View style={[styles.bubble, styles.bubble1, bubble1Style]} />
+                <Animated.View style={[styles.bubble, styles.bubble2, bubble2Style]} />
+                <Animated.View style={[styles.bubble, styles.bubble3, bubble3Style]} />
+              </>
+            )}
           </Animated.View>
 
           {/* Measurement Lines */}
@@ -142,7 +219,7 @@ export default function WaterTracker() {
               </View>
             )}
           </View>
-        </View>
+        </Animated.View>
       </View>
 
       {/* Quick Add Buttons */}
@@ -403,5 +480,30 @@ const createStyles = (theme: typeof lightTheme) =>
       fontSize: theme.fontSize.md,
       fontWeight: theme.fontWeight.semibold,
       color: theme.colors.primary,
+    },
+    bubble: {
+      position: 'absolute',
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    },
+    bubble1: {
+      bottom: 20,
+      left: 40,
+      width: 10,
+      height: 10,
+    },
+    bubble2: {
+      bottom: 10,
+      left: 100,
+      width: 14,
+      height: 14,
+    },
+    bubble3: {
+      bottom: 30,
+      left: 150,
+      width: 8,
+      height: 8,
     },
   });

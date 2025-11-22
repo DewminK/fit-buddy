@@ -1,15 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import React from 'react';
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming
 } from 'react-native-reanimated';
+import { lightTheme } from '../constants/themes';
 import { Exercise } from '../store/slices/exercisesSlice';
-import { lightTheme, darkTheme } from '../constants/themes';
 
 interface ExerciseCardProps {
   exercise: Exercise;

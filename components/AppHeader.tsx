@@ -1,15 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { darkTheme, lightTheme } from '../constants/themes';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleTheme } from '../store/slices/themeSlice';
-import { lightTheme, darkTheme } from '../constants/themes';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
 
 interface AppHeaderProps {
   title?: string;
@@ -17,6 +17,9 @@ interface AppHeaderProps {
   showBackButton?: boolean;
   onBackPress?: () => void;
   rightComponent?: React.ReactNode;
+  showNotification?: boolean;
+  notificationCount?: number;
+  onNotificationPress?: () => void;
 }
 
 export default function AppHeader({
@@ -25,6 +28,9 @@ export default function AppHeader({
   showBackButton = false,
   onBackPress,
   rightComponent,
+  showNotification = true,
+  notificationCount = 0,
+  onNotificationPress,
 }: AppHeaderProps) {
   const dispatch = useAppDispatch();
   const isDark = useAppSelector((state) => state.theme.isDark);
@@ -83,9 +89,25 @@ export default function AppHeader({
           ) : null}
         </View>
 
-        {/* Right side - Theme toggle and custom component */}
+        {/* Right side - Notification, Theme toggle and custom component */}
         <View style={styles.rightSection}>
           {rightComponent}
+          {showNotification && (
+            <TouchableOpacity
+              onPress={onNotificationPress}
+              style={styles.notificationButton}
+              activeOpacity={0.7}
+            >
+              <Feather name="bell" size={22} color={theme.colors.text} />
+              {notificationCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={handleThemeToggle}
             style={styles.themeToggle}
@@ -138,8 +160,8 @@ const createStyles = (theme: typeof lightTheme) =>
     rightSection: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.spacing.sm,
-      minWidth: 50,
+      gap: theme.spacing.xs,
+      minWidth: 90,
       justifyContent: 'flex-end',
     },
     backButton: {
@@ -170,6 +192,27 @@ const createStyles = (theme: typeof lightTheme) =>
       fontWeight: '600',
       color: theme.colors.text,
       textAlign: 'center',
+    },
+    notificationButton: {
+      padding: theme.spacing.xs,
+      position: 'relative',
+    },
+    badge: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      backgroundColor: theme.colors.error,
+      borderRadius: 10,
+      minWidth: 16,
+      height: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 4,
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 10,
+      fontWeight: '700',
     },
     themeToggle: {
       padding: theme.spacing.xs,

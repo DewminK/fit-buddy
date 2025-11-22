@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { authAPI } from '../../services/api';
 import { secureStorage, STORAGE_KEYS } from '../../utils/secureStorage';
 
@@ -9,6 +9,10 @@ export interface User {
   firstName: string;
   lastName: string;
   token: string;
+  phone?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
 }
 
 interface AuthState {
@@ -102,6 +106,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updateUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(action.payload))
+        .catch((error) => console.error('Failed to save user data:', error));
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -151,5 +160,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, updateUser } = authSlice.actions;
 export default authSlice.reducer;

@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppSelector } from '../../store/hooks';
-import { lightTheme, darkTheme } from '../../constants/themes';
-import WaterTracker from '../../components/WaterTracker';
 import AppHeader from '../../components/AppHeader';
+import WaterTracker from '../../components/WaterTracker';
+import { darkTheme, lightTheme } from '../../constants/themes';
+import { useAppSelector } from '../../store/hooks';
 
 export default function ExploreScreen() {
   const isDark = useAppSelector((state) => state.theme.isDark);
