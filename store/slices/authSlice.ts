@@ -1,14 +1,18 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { authAPI } from '../../services/api';
+import { secureStorage, STORAGE_KEYS } from '../../utils/secureStorage';
 
-interface User {
+export interface User {
   id: number;
   username: string;
   email: string;
   firstName: string;
   lastName: string;
   token: string;
+  phone?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
 }
 
 interface AuthState {
@@ -30,11 +34,18 @@ export const login = createAsyncThunk(
   'auth/login',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
+      if (__DEV__) console.log('🔐 Attempting login for:', username);
       const response = await authAPI.login(username, password);
-      await AsyncStorage.setItem('userToken', response.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(response));
+      
+      // Store token and user data securely
+      await secureStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
+      await secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response));
+      
+      if (__DEV__) console.log('✅ Login successful:', response.firstName, response.lastName);
       return response;
     } catch (error: any) {
+      // Only log in development, prevent red box in production
+      if (__DEV__) console.error('❌ Login failed:', error.message);
       return rejectWithValue(error.message || 'Login failed');
     }
   }
@@ -44,11 +55,18 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData: { username: string; email: string; password: string; firstName: string; lastName: string }, { rejectWithValue }) => {
     try {
+      if (__DEV__) console.log('📝 Attempting registration for:', userData.username);
       const response = await authAPI.register(userData);
-      await AsyncStorage.setItem('userToken', response.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(response));
+      
+      // Store token and user data securely
+      await secureStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
+      await secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response));
+      
+      if (__DEV__) console.log('✅ Registration successful:', response.firstName, response.lastName);
       return response;
     } catch (error: any) {
+      // Only log in development, prevent red box in production
+      if (__DEV__) console.error('❌ Registration failed:', error.message);
       return rejectWithValue(error.message || 'Registration failed');
     }
   }
@@ -58,12 +76,17 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
     try {
-      const userData = await AsyncStorage.getItem('userData');
+      const userData = await secureStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (userData) {
-        return JSON.parse(userData);
+        const user = JSON.parse(userData);
+        if (__DEV__) console.log('✅ User loaded from storage:', user.username);
+        return user;
       }
+      if (__DEV__) console.log('ℹ️ No user data found in storage');
       return null;
     } catch (error: any) {
+      // Only log in development, prevent red box in production
+      if (__DEV__) console.error('❌ Error loading user:', error.message);
       return rejectWithValue(error.message);
     }
   }
@@ -72,8 +95,10 @@ export const loadUser = createAsyncThunk(
 export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
-    await AsyncStorage.removeItem('userToken');
-    await AsyncStorage.removeItem('userData');
+    if (__DEV__) console.log('👋 Logging out...');
+    await secureStorage.removeItem(STORAGE_KEYS.USER_TOKEN);
+    await secureStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    if (__DEV__) console.log('✅ Logout complete');
   }
 );
 
@@ -83,6 +108,11 @@ const authSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+    },
+    updateUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(action.payload))
+        .catch((error) => console.error('Failed to save user data:', error));
     },
   },
   extraReducers: (builder) => {
@@ -133,5 +163,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, updateUser } = authSlice.actions;
 export default authSlice.reducer;

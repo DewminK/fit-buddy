@@ -1,49 +1,84 @@
-# FitBuddy - Your Personal Fitness Companion 💪
+# FitBuddy - Your Personal Fitness Companion 💪🏋️
 
-FitBuddy is a comprehensive mobile fitness application built with **React Native** and **Expo**. Track exercises, manage your workout favorites, and achieve your wellness goals with a beautifully designed, user-friendly interface.
+FitBuddy is a comprehensive mobile fitness application built with **React Native** and **Expo**. Track exercises, monitor water intake, manage your workout favorites, and achieve your wellness goals with a beautifully designed, animated, user-friendly interface.
 
 ## 📱 Features
 
 ### Core Functionality
 
-- **User Authentication**
+- **User Authentication** 🔐
   - Secure login and registration with form validation
   - Password strength requirements
-  - Token-based authentication with AsyncStorage
+  - Token-based authentication with **Expo SecureStore** (native) and AsyncStorage (web)
   - Demo credentials available for quick testing
+  - Persistent sessions with automatic login
 
-- **Exercise Library**
-  - Browse comprehensive exercise database
-  - Filter by muscle group (chest, back, biceps, shoulders, etc.)
+- **Exercise Library** 💪
+  - Browse comprehensive exercise database (35+ exercises)
+  - Filter by muscle group (chest, back, biceps, triceps, shoulders, legs, abs, etc.)
   - Filter by difficulty level (beginner, intermediate, expert)
   - Search functionality for quick exercise lookup
   - Detailed exercise information with instructions
+  - Animated exercise cards with smooth transitions
+  - Exercise categories: Strength, Cardio, Flexibility & Stretching
 
-- **Favorites Management**
-  - Add/remove exercises to favorites
+- **Water Intake Tracker** 💧
+  - Beautiful animated water glass visualization
+  - Track daily water consumption with customizable goals
+  - Quick add buttons (250ml, 500ml, 750ml, 1000ml)
+  - Real-time progress tracking with wave animations
+  - Daily log with timestamps
+  - Undo last entry functionality
+  - Persistent storage across app restarts
+  - Visual ripple effects when adding water
+
+- **Favorites Management** ❤️
+  - Add/remove exercises to favorites with animated heart icon
   - Persistent storage using AsyncStorage
   - Quick access to saved exercises
   - Visual indicators for favorited exercises
+  - Favorite count in dedicated tab
 
-- **User Profile**
+- **User Profile** 👤
   - Display user information
   - Track workout statistics
   - Settings and preferences
+  - Logout functionality
 
-- **Dark Mode**
+- **Dark Mode** 🌙
   - Toggle between light and dark themes
   - Persistent theme preference
   - Smooth theme transitions
+  - Consistent styling across all screens
 
 ### Technical Highlights
 
 - **State Management**: Redux Toolkit for efficient state management
 - **Navigation**: Expo Router with Stack and Tab navigation
+- **Animations**: React Native Reanimated for smooth 60fps animations
 - **Form Validation**: Yup schema validation with Formik
-- **Data Persistence**: AsyncStorage for secure local storage
+- **Data Persistence**: 
+  - Expo SecureStore for sensitive data (tokens) on native platforms
+  - AsyncStorage for general data and web platform
 - **Icons**: Feather Icons for consistent iconography
-- **API Integration**: Axios for API calls with mock data fallback
+- **API Integration**: 
+  - Environment variables with .env files
+  - Axios for API calls with mock data fallback
+  - API Ninjas for exercise data (optional)
 - **Responsive Design**: Adapts to various screen sizes
+- **Type Safety**: Full TypeScript implementation
+- **Error Handling**: 
+  - Global React Error Boundary for graceful error recovery
+  - Try-catch blocks protecting async operations
+  - User-friendly error messages with retry functionality
+  - Automatic fallback UI when components crash
+  - Production-ready error suppression (no red boxes in release builds)
+- **Custom Modals**:
+  - Beautiful animated modal system replacing native alerts
+  - Consistent design across all dialogs
+  - Type-specific styling (success, error, warning, info, confirm)
+  - Dark mode support with smooth animations
+  - Spring physics for natural feel
 
 ## 🚀 Getting Started
 
@@ -69,30 +104,49 @@ FitBuddy is a comprehensive mobile fitness application built with **React Native
    npm install
    ```
 
-   Required packages include:
+   Key packages include:
    - `@reduxjs/toolkit` - State management
    - `react-redux` - React bindings for Redux
    - `@react-native-async-storage/async-storage` - Data persistence
+   - `expo-secure-store` - Secure token storage
+   - `react-native-reanimated` - Animations
    - `axios` - HTTP client
    - `yup` - Schema validation
    - `formik` - Form management
+   - `@dotenvx/dotenvx` - Environment variables
 
-   If you encounter issues, install manually:
+3. **Environment Configuration**
+
+   Copy the example environment file and configure your API keys:
+
    ```bash
-   npm install @reduxjs/toolkit react-redux @react-native-async-storage/async-storage axios yup formik
+   cp .env.example .env
    ```
 
-3. **Start the development server**
+   Edit `.env` file:
+   ```env
+   EXPO_PUBLIC_FITNESS_API_KEY=your_api_ninjas_key_here
+   EXPO_PUBLIC_FITNESS_API_BASE=https://api.api-ninjas.com/v1
+   EXPO_PUBLIC_AUTH_API_BASE=https://dummyjson.com
+   ```
+
+   **Note**: The app works with mock data if no API key is provided. To get a free API key:
+   - Visit [https://api-ninjas.com/](https://api-ninjas.com/)
+   - Sign up for a free account
+   - Copy your API key to the `.env` file
+
+4. **Start the development server**
 
    ```bash
    npx expo start
    ```
 
-4. **Run the app**
+5. **Run the app**
 
    - **iOS Simulator**: Press `i`
    - **Android Emulator**: Press `a`
    - **Physical Device**: Scan QR code with Expo Go app
+   - **Web Browser**: Press `w`
 
 ## 🔐 Demo Credentials
 
@@ -111,35 +165,48 @@ Or create a new account with the registration form.
 fit-buddy/
 ├── app/                          # Expo Router screens
 │   ├── (tabs)/                  # Bottom tab navigation
-│   │   ├── index.tsx           # Home screen
+│   │   ├── _layout.tsx         # Tab navigator
+│   │   ├── index.tsx           # Home screen (Exercise list)
+│   │   ├── explore.tsx         # Explore screen (Water tracker)
 │   │   ├── favorites.tsx       # Favorites screen
 │   │   └── profile.tsx         # Profile screen
 │   ├── auth/                    # Authentication screens
+│   │   ├── _layout.tsx         # Auth stack navigator
 │   │   ├── login.tsx           # Login screen
 │   │   └── register.tsx        # Register screen
 │   ├── exercise-detail.tsx     # Exercise detail modal
 │   └── _layout.tsx             # Root layout with Redux Provider
-├── screens/                     # Screen components
+├── screens/                     # Legacy screen components
 │   ├── auth/                   # Auth screen implementations
 │   ├── HomeScreen.tsx          # Main exercise list
 │   ├── FavoritesScreen.tsx     # Favorites management
 │   ├── ProfileScreen.tsx       # User profile & settings
 │   └── ExerciseDetailScreen.tsx # Exercise details
+├── components/                  # Reusable components
+│   ├── WaterTracker.tsx        # Animated water intake tracker
+│   ├── ExerciseCard.tsx        # Animated exercise card
+│   └── ui/                     # UI components
 ├── store/                       # Redux state management
 │   ├── slices/                 # Redux slices
 │   │   ├── authSlice.ts       # Authentication state
 │   │   ├── exercisesSlice.ts  # Exercise data state
 │   │   ├── favoritesSlice.ts  # Favorites state
-│   │   └── themeSlice.ts      # Theme state
+│   │   ├── themeSlice.ts      # Theme state
+│   │   └── waterSlice.ts      # Water tracking state
 │   ├── index.ts               # Store configuration
 │   └── hooks.ts               # Typed Redux hooks
 ├── services/                    # API services
-│   └── api.ts                  # API client & endpoints
+│   └── api.ts                  # API client & endpoints with mock data
 ├── utils/                       # Utility functions
-│   └── validation.ts           # Yup validation schemas
+│   ├── validation.ts           # Yup validation schemas
+│   └── secureStorage.ts        # Secure storage wrapper
 ├── constants/                   # Constants & themes
-│   └── themes.ts               # Theme configuration
-└── components/                  # Reusable components
+│   ├── themes.ts               # Theme configuration
+│   └── theme.ts                # Additional theme constants
+├── .env                         # Environment variables (not in git)
+├── .env.example                # Example environment configuration
+├── .gitignore                  # Git ignore rules
+└── package.json                # Dependencies and scripts
 
 ```
 
@@ -196,57 +263,95 @@ fit-buddy/
 
 ### API Setup (Optional)
 
-To use real exercise data, get a free API key from [API Ninjas](https://api-ninjas.com):
+The app works perfectly with built-in mock data containing **35+ exercises**. However, to use real-time data from API Ninjas:
 
-1. Sign up at API Ninjas
-2. Get your API key
-3. Update `services/api.ts`:
-   ```typescript
-   const FITNESS_API_KEY = 'YOUR_API_KEY_HERE';
+1. Visit [API Ninjas](https://api-ninjas.com) and sign up for a free account
+2. Navigate to your profile and copy your API key
+3. Update your `.env` file:
+   ```env
+   EXPO_PUBLIC_FITNESS_API_KEY=your_actual_api_key_here
    ```
+4. Restart the Expo development server
 
-The app includes comprehensive mock data, so an API key is not required for development.
+**Mock Data Includes:**
+- 35+ exercises across all major muscle groups
+- Beginner, intermediate, and expert difficulties
+- Strength training, cardio, and flexibility exercises
+- Detailed instructions for each exercise
+- Equipment requirements and muscle targets
 
 ## 📱 Screens Overview
 
 ### Authentication
-- **Login Screen**: Email/password authentication with validation
+- **Login Screen**: Username/password authentication with validation
 - **Register Screen**: New user registration with strong password requirements
 
 ### Main App (Bottom Tabs)
-- **Home**: Browse and search exercises with filters
-- **Favorites**: Manage saved exercises
-- **Profile**: User info, stats, and settings (including dark mode toggle)
+- **Home Tab** 🏠: 
+  - Browse and search exercises with animated cards
+  - Filter by muscle group and difficulty
+  - Quick search functionality
+  - Animated exercise cards with smooth transitions
+  - Pull-to-refresh
+  
+- **Explore Tab** 🔍: 
+  - Animated water intake tracker
+  - Visual glass with wave effects
+  - Quick add buttons (250ml - 1000ml)
+  - Daily log with timestamps
+  - Goal tracking with progress indicator
+  
+- **Favorites Tab** ❤️: 
+  - All favorited exercises in one place
+  - Same filtering and search capabilities
+  - Quick access to your workout routines
+  
+- **Profile Tab** 👤: 
+  - User info and stats
+  - Dark mode toggle with smooth transition
+  - Settings and preferences
+  - Logout functionality
 
 ### Modals
-- **Exercise Detail**: Comprehensive exercise information with tips
+- **Exercise Detail**: Comprehensive exercise information with instructions, muscle groups, equipment, and difficulty level
 
 ## 🧪 Testing
 
 ### Manual Testing Checklist
 - [ ] User can register with valid credentials
-- [ ] User can login with demo credentials
-- [ ] Exercise list loads and displays correctly
+- [ ] User can login with demo credentials (emilys / emilyspass)
+- [ ] Exercise list loads with animated cards
 - [ ] Filters work properly (muscle group, difficulty)
 - [ ] Search functionality works
-- [ ] User can add/remove favorites
+- [ ] User can add/remove favorites with animation
 - [ ] Favorites persist after app restart
-- [ ] Dark mode toggle works
+- [ ] Water tracker displays and animates correctly
+- [ ] Water intake can be added with ripple effect
+- [ ] Water intake persists daily and resets next day
+- [ ] Undo last water entry works
+- [ ] Dark mode toggle works with smooth transition
 - [ ] Theme persists after app restart
 - [ ] Navigation between screens works smoothly
+- [ ] Animations run at 60fps
+- [ ] Pull-to-refresh works on exercise list
+- [ ] Authentication persists across app restarts
+- [ ] Secure storage works on native platforms
 
 ## 🛠️ Technologies Used
 
-- **React Native** - Mobile framework
-- **Expo** - Development platform
-- **TypeScript** - Type safety
-- **Redux Toolkit** - State management
-- **Expo Router** - File-based routing
-- **AsyncStorage** - Data persistence
-- **Axios** - HTTP client
-- **Yup** - Schema validation
-- **Formik** - Form management
+- **React Native** (0.81.5) - Mobile framework
+- **Expo** (SDK 54) - Development platform
+- **TypeScript** (5.9.2) - Type safety
+- **Redux Toolkit** (2.10.1) - State management
+- **Expo Router** (6.0.15) - File-based routing
+- **React Native Reanimated** (4.1.1) - 60fps animations
+- **Expo SecureStore** - Secure token storage
+- **AsyncStorage** (2.2.0) - Data persistence
+- **Axios** (1.13.2) - HTTP client
+- **Yup** (1.7.1) - Schema validation
+- **Formik** (2.4.9) - Form management
 - **Feather Icons** - Icon library
+- **Expo Constants** - Environment variables
 
 ## 📝 Development Notes
 

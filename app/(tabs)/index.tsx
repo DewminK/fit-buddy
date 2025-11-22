@@ -1,22 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  RefreshControl,
-  TextInput,
-} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AppHeader from '../../components/AppHeader';
+import ExerciseCard from '../../components/ExerciseCard';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchExercises, setFilter } from '../../store/slices/exercisesSlice';
-import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../../constants/themes';
-import { Exercise } from '../../store/slices/exercisesSlice';
+import { Exercise, fetchExercises, setFilter } from '../../store/slices/exercisesSlice';
+import { toggleFavorite } from '../../store/slices/favoritesSlice';
+import { addNotification } from '../../store/slices/notificationsSlice';
 
-const MUSCLES = ['all', 'chest', 'back', 'biceps', 'triceps', 'shoulders', 'quadriceps', 'abdominals', 'lats'];
+const MUSCLES = ['all', 'chest', 'back', 'biceps', 'triceps', 'shoulders', 'quadriceps', 'abdominals', 'lats', 'hamstrings', 'calves'];
 const DIFFICULTIES = ['all', 'beginner', 'intermediate', 'expert'];
 
 export default function HomeScreen() {
@@ -26,23 +31,37 @@ export default function HomeScreen() {
   const { user } = useAppSelector((state: any) => state.auth);
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const favorites = useAppSelector((state: any) => state.favorites.favorites);
+  const unreadCount = useAppSelector((state: any) => state.notifications?.unreadCount || 0);
   const theme = isDark ? darkTheme : lightTheme;
   
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  const handleNotificationPress = () => {
+    router.push('/notifications');
+  };
 
   useEffect(() => {
     loadExercises();
   }, []);
 
   const loadExercises = async () => {
-    await dispatch(fetchExercises({}));
+    try {
+      await dispatch(fetchExercises({}));
+    } catch (error) {
+      console.error('Failed to load exercises:', error);
+    }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadExercises();
-    setRefreshing(false);
+    try {
+      await loadExercises();
+    } catch (error) {
+      console.error('Failed to refresh exercises:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleFilterMuscle = (muscle: string) => {
@@ -62,64 +81,44 @@ export default function HomeScreen() {
     exercise.muscle.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderExerciseCard = ({ item }: { item: Exercise }) => (
-    <TouchableOpacity
-      style={styles(theme).card}
+  const handleFavoritePress = (exercise: Exercise) => {
+    const isFavorite = favorites.some((fav) => fav.name === exercise.name);
+    dispatch(toggleFavorite(exercise));
+    
+    // Add notification when adding to favorites
+    if (!isFavorite) {
+      dispatch(addNotification({
+        type: 'favorite',
+        title: 'Added to Favorites',
+        message: `${exercise.name} has been added to your favorites!`,
+        exerciseName: exercise.name,
+      }));
+    }
+  };
+
+  const renderExerciseCard = ({ item, index }: { item: Exercise; index: number }) => (
+    <ExerciseCard
+      exercise={item}
       onPress={() => router.push({ pathname: '/exercise-detail', params: { exercise: JSON.stringify(item) } })}
-      activeOpacity={0.7}
-    >
-      <View style={styles(theme).cardHeader}>
-        <View style={styles(theme).iconContainer}>
-          <Feather
-            name={getMuscleIcon(item.muscle) as any}
-            size={32}
-            color={theme.colors.primary}
-          />
-        </View>
-        <View style={styles(theme).cardHeaderContent}>
-          <Text style={styles(theme).cardTitle} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <View style={styles(theme).cardMeta}>
-            <View style={[styles(theme).badge, { backgroundColor: getDifficultyColor(item.difficulty, theme) + '20' }]}>
-              <Text style={[styles(theme).badgeText, { color: getDifficultyColor(item.difficulty, theme) }]}>
-                {item.difficulty}
-              </Text>
-            </View>
-            <View style={[styles(theme).badge, { backgroundColor: theme.colors.info + '20' }]}>
-              <Text style={[styles(theme).badgeText, { color: theme.colors.info }]}>
-                {item.type}
-              </Text>
-            </View>
-          </View>
-        </View>
-        {isFavorite(item.name) && (
-          <Feather name="heart" size={24} color={theme.colors.error} style={{ marginLeft: 8 }} />
-        )}
-      </View>
-      
-      <Text style={styles(theme).cardDescription} numberOfLines={2}>
-        Target: {item.muscle} • Equipment: {item.equipment}
-      </Text>
-      
-      <View style={styles(theme).cardFooter}>
-        <Feather name="chevron-right" size={20} color={theme.colors.primary} />
-      </View>
-    </TouchableOpacity>
+      onFavoritePress={() => handleFavoritePress(item)}
+      isFavorite={isFavorite(item.name)}
+      theme={theme}
+      index={index}
+    />
   );
 
   const styles = createStyles;
 
   return (
-    <View style={styles(theme).container}>
-      {/* Header */}
-      <View style={styles(theme).header}>
-        <View>
-          <Text style={styles(theme).greeting}>Hello, {user?.firstName || 'User'}!</Text>
-          <Text style={styles(theme).headerTitle}>Ready to workout?</Text>
-        </View>
-        <Feather name="activity" size={32} color={theme.colors.primary} />
-      </View>
+    <SafeAreaView style={styles(theme).container} edges={['bottom']}>
+      {/* Header with theme toggle */}
+      <AppHeader 
+        notificationCount={unreadCount}
+        onNotificationPress={handleNotificationPress}
+      />
+
+      {/* Spacing after header */}
+      <View style={styles(theme).headerSpacer} />
 
       {/* Search Bar */}
       <View style={styles(theme).searchContainer}>
@@ -138,64 +137,99 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* Muscle Filter */}
-      <View style={styles(theme).filterSection}>
-        <Text style={styles(theme).filterLabel}>Muscle Group</Text>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={MUSCLES}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
+      {/* Filter Dropdowns Row */}
+      <View style={styles(theme).filtersRow}>
+        {/* Muscle Group Dropdown */}
+        <View style={styles(theme).dropdownContainer}>
+          <Text style={styles(theme).dropdownLabel}>Muscle Group</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles(theme).dropdownScroll}
+          >
             <TouchableOpacity
               style={[
-                styles(theme).filterChip,
-                currentFilter.muscle === item && styles(theme).filterChipActive,
+                styles(theme).dropdownChip,
+                !currentFilter.muscle && styles(theme).dropdownChipActive,
               ]}
-              onPress={() => handleFilterMuscle(item)}
+              onPress={() => handleFilterMuscle('')}
             >
               <Text
                 style={[
-                  styles(theme).filterChipText,
-                  currentFilter.muscle === item && styles(theme).filterChipTextActive,
+                  styles(theme).dropdownChipText,
+                  !currentFilter.muscle && styles(theme).dropdownChipTextActive,
                 ]}
               >
-                {item}
+                All
               </Text>
             </TouchableOpacity>
-          )}
-          contentContainerStyle={styles(theme).filterList}
-        />
-      </View>
+            {MUSCLES.filter(m => m !== 'all').map((muscle) => (
+              <TouchableOpacity
+                key={muscle}
+                style={[
+                  styles(theme).dropdownChip,
+                  currentFilter.muscle === muscle && styles(theme).dropdownChipActive,
+                ]}
+                onPress={() => handleFilterMuscle(muscle)}
+              >
+                <Text
+                  style={[
+                    styles(theme).dropdownChipText,
+                    currentFilter.muscle === muscle && styles(theme).dropdownChipTextActive,
+                  ]}
+                >
+                  {muscle}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      {/* Difficulty Filter */}
-      <View style={styles(theme).filterSection}>
-        <Text style={styles(theme).filterLabel}>Difficulty</Text>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={DIFFICULTIES}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
+        {/* Difficulty Dropdown */}
+        <View style={styles(theme).dropdownContainer}>
+          <Text style={styles(theme).dropdownLabel}>Difficulty</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles(theme).dropdownScroll}
+          >
             <TouchableOpacity
               style={[
-                styles(theme).filterChip,
-                currentFilter.difficulty === item && styles(theme).filterChipActive,
+                styles(theme).dropdownChip,
+                !currentFilter.difficulty && styles(theme).dropdownChipActive,
               ]}
-              onPress={() => handleFilterDifficulty(item)}
+              onPress={() => handleFilterDifficulty('')}
             >
               <Text
                 style={[
-                  styles(theme).filterChipText,
-                  currentFilter.difficulty === item && styles(theme).filterChipTextActive,
+                  styles(theme).dropdownChipText,
+                  !currentFilter.difficulty && styles(theme).dropdownChipTextActive,
                 ]}
               >
-                {item}
+                All
               </Text>
             </TouchableOpacity>
-          )}
-          contentContainerStyle={styles(theme).filterList}
-        />
+            {DIFFICULTIES.filter(d => d !== 'all').map((difficulty) => (
+              <TouchableOpacity
+                key={difficulty}
+                style={[
+                  styles(theme).dropdownChip,
+                  currentFilter.difficulty === difficulty && styles(theme).dropdownChipActive,
+                ]}
+                onPress={() => handleFilterDifficulty(difficulty)}
+              >
+                <Text
+                  style={[
+                    styles(theme).dropdownChipText,
+                    currentFilter.difficulty === difficulty && styles(theme).dropdownChipTextActive,
+                  ]}
+                >
+                  {difficulty}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
 
       {/* Exercise List */}
@@ -226,7 +260,7 @@ export default function HomeScreen() {
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -236,22 +270,8 @@ const createStyles = (theme: typeof lightTheme) =>
       flex: 1,
       backgroundColor: theme.colors.background,
     },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.xl,
-    },
-    greeting: {
-      fontSize: theme.fontSize.md,
-      color: theme.colors.textSecondary,
-    },
-    headerTitle: {
-      fontSize: theme.fontSize.xl,
-      fontWeight: theme.fontWeight.bold,
-      color: theme.colors.text,
-      marginTop: theme.spacing.xs,
+    headerSpacer: {
+      height: theme.spacing.md,
     },
     searchContainer: {
       flexDirection: 'row',
@@ -271,39 +291,44 @@ const createStyles = (theme: typeof lightTheme) =>
       fontSize: theme.fontSize.md,
       color: theme.colors.text,
     },
-    filterSection: {
+    filtersRow: {
+      paddingHorizontal: theme.spacing.lg,
       marginBottom: theme.spacing.md,
+      gap: theme.spacing.md,
     },
-    filterLabel: {
+    dropdownContainer: {
+      marginBottom: theme.spacing.sm,
+    },
+    dropdownLabel: {
       fontSize: theme.fontSize.sm,
       fontWeight: theme.fontWeight.semibold,
-      color: theme.colors.textSecondary,
-      marginLeft: theme.spacing.lg,
-      marginBottom: theme.spacing.sm,
-      textTransform: 'uppercase',
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
     },
-    filterList: {
-      paddingHorizontal: theme.spacing.lg,
+    dropdownScroll: {
+      flexGrow: 0,
     },
-    filterChip: {
+    dropdownChip: {
       paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      borderRadius: theme.borderRadius.lg,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.borderRadius.md,
       backgroundColor: theme.colors.surface,
+      marginRight: theme.spacing.xs,
       borderWidth: 1,
       borderColor: theme.colors.border,
-      marginRight: theme.spacing.sm,
+      minWidth: 70,
+      alignItems: 'center',
     },
-    filterChipActive: {
+    dropdownChipActive: {
       backgroundColor: theme.colors.primary,
       borderColor: theme.colors.primary,
     },
-    filterChipText: {
+    dropdownChipText: {
       fontSize: theme.fontSize.sm,
       color: theme.colors.text,
       textTransform: 'capitalize',
     },
-    filterChipTextActive: {
+    dropdownChipTextActive: {
       color: '#FFFFFF',
       fontWeight: theme.fontWeight.semibold,
     },

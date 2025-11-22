@@ -1,23 +1,24 @@
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { useFormik } from 'formik';
-import { useRouter } from 'expo-router';
+import CustomModal from '../../components/CustomModal';
+import { darkTheme, lightTheme } from '../../constants/themes';
+import { useCustomModal } from '../../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/slices/authSlice';
 import { loginSchema } from '../../utils/validation';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function LoginScreen() {
   const { isLoading } = useAppSelector((state: any) => state.auth);
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const theme = isDark ? darkTheme : lightTheme;
+  const { modalConfig, hideModal, showError } = useCustomModal();
   
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,7 +41,7 @@ export default function LoginScreen() {
         await dispatch(login(values)).unwrap();
         // Navigation will be handled by the root navigator
       } catch (err) {
-        Alert.alert('Login Failed', 'Invalid username or password');
+        showError('Login Failed', 'Invalid username or password. Please check your credentials or sign up for a new account.');
       }
     },
   });
@@ -140,6 +142,18 @@ export default function LoginScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <CustomModal
+        visible={modalConfig.visible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={hideModal}
+        onConfirm={modalConfig.onConfirm}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        isDark={isDark}
+      />
     </KeyboardAvoidingView>
   );
 }

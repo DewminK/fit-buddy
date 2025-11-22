@@ -1,19 +1,20 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  Alert,
-} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AppHeader from '../../components/AppHeader';
+import CustomModal from '../../components/CustomModal';
+import { darkTheme, lightTheme } from '../../constants/themes';
+import { useCustomModal } from '../../hooks/useCustomModal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
-import { toggleTheme } from '../../store/slices/themeSlice';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -22,43 +23,37 @@ export default function ProfileScreen() {
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const favorites = useAppSelector((state: any) => state.favorites.favorites);
   const theme = isDark ? darkTheme : lightTheme;
-
-  const handleToggleTheme = () => {
-    dispatch(toggleTheme());
-  };
+  const { modalConfig, hideModal, showConfirm, showInfo } = useCustomModal();
 
   const handleLogout = () => {
-    Alert.alert(
+    showConfirm(
       'Logout',
       'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await dispatch(logout());
-            router.replace('/auth/login');
-          },
-        },
-      ]
+      async () => {
+        await dispatch(logout());
+        router.replace('/auth/login');
+      },
+      'Logout',
+      'Cancel'
     );
   };
 
   const styles = createStyles;
 
   return (
-    <ScrollView style={styles(theme).container}>
-      {/* Header */}
-      <View style={styles(theme).header}>
-        <View style={styles(theme).avatarContainer}>
-          <Feather name="user" size={48} color={theme.colors.primary} />
+    <SafeAreaView style={styles(theme).container} edges={['bottom']}>
+      <AppHeader title="Profile" subtitle="Manage your account" />
+      <ScrollView>
+        {/* Header */}
+        <View style={styles(theme).header}>
+          <View style={styles(theme).avatarContainer}>
+            <Feather name="user" size={48} color={theme.colors.primary} />
+          </View>
+          <Text style={styles(theme).name}>
+            {user?.firstName} {user?.lastName}
+          </Text>
+          <Text style={styles(theme).email}>{user?.email}</Text>
         </View>
-        <Text style={styles(theme).name}>
-          {user?.firstName} {user?.lastName}
-        </Text>
-        <Text style={styles(theme).email}>{user?.email}</Text>
-      </View>
 
       {/* Stats Section */}
       <View style={styles(theme).statsContainer}>
@@ -83,24 +78,11 @@ export default function ProfileScreen() {
       <View style={styles(theme).section}>
         <Text style={styles(theme).sectionTitle}>Settings</Text>
 
-        <View style={styles(theme).settingCard}>
-          <View style={styles(theme).settingLeft}>
-            <Feather
-              name={isDark ? 'moon' : 'sun'}
-              size={22}
-              color={theme.colors.text}
-            />
-            <Text style={styles(theme).settingText}>Dark Mode</Text>
-          </View>
-          <Switch
-            value={isDark}
-            onValueChange={handleToggleTheme}
-            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-            thumbColor="#FFFFFF"
-          />
-        </View>
-
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => router.push('/notifications')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="bell" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Notifications</Text>
@@ -108,7 +90,11 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => showInfo('Privacy', 'Privacy settings coming soon!')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="lock" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Privacy</Text>
@@ -121,7 +107,11 @@ export default function ProfileScreen() {
       <View style={styles(theme).section}>
         <Text style={styles(theme).sectionTitle}>Account</Text>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => router.push('/edit-profile')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="edit" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Edit Profile</Text>
@@ -129,7 +119,11 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => showInfo('Help & Support', 'Need help? Email us at support@fitbuddy.com')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="help-circle" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>Help & Support</Text>
@@ -137,7 +131,11 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles(theme).settingCard}>
+        <TouchableOpacity 
+          style={styles(theme).settingCard}
+          onPress={() => showInfo('FitBuddy', 'Version 1.0.0\n\nYour personal fitness companion\n\n© 2025 FitBuddy')}
+          activeOpacity={0.7}
+        >
           <View style={styles(theme).settingLeft}>
             <Feather name="info" size={22} color={theme.colors.text} />
             <Text style={styles(theme).settingText}>About</Text>
@@ -158,7 +156,20 @@ export default function ProfileScreen() {
 
       {/* App Version */}
       <Text style={styles(theme).version}>FitBuddy v1.0.0</Text>
-    </ScrollView>
+      </ScrollView>
+
+      <CustomModal
+        visible={modalConfig.visible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={hideModal}
+        onConfirm={modalConfig.onConfirm}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        isDark={isDark}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -171,7 +182,7 @@ const createStyles = (theme: typeof lightTheme) =>
     header: {
       alignItems: 'center',
       padding: theme.spacing.xl,
-      paddingTop: theme.spacing.xl * 1.5,
+      paddingTop: theme.spacing.md,
     },
     avatarContainer: {
       width: 100,

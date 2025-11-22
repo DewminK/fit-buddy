@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFormik } from 'formik';
+import React, { useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { register } from '../../store/slices/authSlice';
 import { registerSchema } from '../../utils/validation';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 interface RegisterScreenProps {
   navigation: any;
@@ -50,9 +50,15 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
           email: values.email,
           password: values.password,
         })).unwrap();
-        Alert.alert('Success', 'Account created successfully!');
-      } catch (err) {
-        Alert.alert('Registration Failed', 'Please try again');
+        Alert.alert(
+          '🎉 Success!', 
+          `Welcome ${values.firstName}! Your account has been created. You will be automatically logged in.`,
+          [{ text: 'OK' }]
+        );
+        // User will be automatically logged in and navigation handled by root navigator
+      } catch (err: any) {
+        const errorMessage = err || 'Registration failed. Please try again.';
+        Alert.alert('Registration Failed', errorMessage);
       }
     },
   });

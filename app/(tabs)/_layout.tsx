@@ -1,8 +1,8 @@
+import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Feather } from '@expo/vector-icons';
+import { darkTheme, lightTheme } from '../../constants/themes';
 import { useAppSelector } from '../../store/hooks';
-import { lightTheme, darkTheme } from '../../constants/themes';
 
 export default function TabLayout() {
   const isDark = useAppSelector((state) => state.theme.isDark);
@@ -25,6 +25,13 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => <Feather name="home" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Water',
+          tabBarIcon: ({ color, size }) => <Feather name="droplet" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
