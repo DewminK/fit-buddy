@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from '../../services/api';
+import { secureStorage, STORAGE_KEYS } from '../../utils/secureStorage';
 
-interface User {
+export interface User {
   id: number;
   username: string;
   email: string;
@@ -30,11 +30,17 @@ export const login = createAsyncThunk(
   'auth/login',
   async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
     try {
+      console.log('🔐 Attempting login for:', username);
       const response = await authAPI.login(username, password);
-      await AsyncStorage.setItem('userToken', response.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(response));
+      
+      // Store token and user data securely
+      await secureStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
+      await secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response));
+      
+      console.log('✅ Login successful:', response.firstName, response.lastName);
       return response;
     } catch (error: any) {
+      console.error('❌ Login failed:', error.message);
       return rejectWithValue(error.message || 'Login failed');
     }
   }
@@ -44,11 +50,17 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData: { username: string; email: string; password: string; firstName: string; lastName: string }, { rejectWithValue }) => {
     try {
+      console.log('📝 Attempting registration for:', userData.username);
       const response = await authAPI.register(userData);
-      await AsyncStorage.setItem('userToken', response.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(response));
+      
+      // Store token and user data securely
+      await secureStorage.setItem(STORAGE_KEYS.USER_TOKEN, response.token);
+      await secureStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response));
+      
+      console.log('✅ Registration successful:', response.firstName, response.lastName);
       return response;
     } catch (error: any) {
+      console.error('❌ Registration failed:', error.message);
       return rejectWithValue(error.message || 'Registration failed');
     }
   }
@@ -58,12 +70,16 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
     try {
-      const userData = await AsyncStorage.getItem('userData');
+      const userData = await secureStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (userData) {
-        return JSON.parse(userData);
+        const user = JSON.parse(userData);
+        console.log('✅ User loaded from storage:', user.username);
+        return user;
       }
+      console.log('ℹ️ No user data found in storage');
       return null;
     } catch (error: any) {
+      console.error('❌ Error loading user:', error.message);
       return rejectWithValue(error.message);
     }
   }
@@ -72,8 +88,10 @@ export const loadUser = createAsyncThunk(
 export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
-    await AsyncStorage.removeItem('userToken');
-    await AsyncStorage.removeItem('userData');
+    console.log('👋 Logging out...');
+    await secureStorage.removeItem(STORAGE_KEYS.USER_TOKEN);
+    await secureStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    console.log('✅ Logout complete');
   }
 );
 

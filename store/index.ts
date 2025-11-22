@@ -3,6 +3,8 @@ import authReducer from './slices/authSlice';
 import exercisesReducer from './slices/exercisesSlice';
 import favoritesReducer from './slices/favoritesSlice';
 import themeReducer from './slices/themeSlice';
+import waterReducer from './slices/waterSlice';
+import workoutsReducer from './slices/workoutsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +12,7 @@ export const store = configureStore({
     exercises: exercisesReducer,
     favorites: favoritesReducer,
     theme: themeReducer,
+    water: waterReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { toggleFavorite } from '../../store/slices/favoritesSlice';
 import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../../constants/themes';
 import { Exercise } from '../../store/slices/exercisesSlice';
+import AppHeader from '../../components/AppHeader';
 
 export default function FavoritesScreen() {
   const router = useRouter();
@@ -76,17 +78,14 @@ export default function FavoritesScreen() {
   const styles = createStyles;
 
   return (
-    <View style={styles(theme).container}>
-      {/* Header */}
-      <View style={styles(theme).header}>
-        <View>
-          <Text style={styles(theme).headerTitle}>Favorites</Text>
-          <Text style={styles(theme).headerSubtitle}>
-            {favorites.length} {favorites.length === 1 ? 'exercise' : 'exercises'}
-          </Text>
-        </View>
-        <Feather name="heart" size={32} color={theme.colors.error} />
-      </View>
+    <SafeAreaView style={styles(theme).container} edges={['bottom']}>
+      <AppHeader 
+        title="Favorites" 
+        subtitle={`${favorites.length} ${favorites.length === 1 ? 'exercise' : 'exercises'}`}
+        rightComponent={
+          <Feather name="heart" size={28} color={theme.colors.error} />
+        }
+      />
 
       {/* Favorites List */}
       {favorites.length === 0 ? (
@@ -112,7 +111,7 @@ export default function FavoritesScreen() {
           contentContainerStyle={styles(theme).listContent}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -121,23 +120,6 @@ const createStyles = (theme: typeof lightTheme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.xl,
-    },
-    headerTitle: {
-      fontSize: theme.fontSize.xl,
-      fontWeight: theme.fontWeight.bold,
-      color: theme.colors.text,
-    },
-    headerSubtitle: {
-      fontSize: theme.fontSize.md,
-      color: theme.colors.textSecondary,
-      marginTop: theme.spacing.xs,
     },
     listContent: {
       paddingHorizontal: theme.spacing.lg,

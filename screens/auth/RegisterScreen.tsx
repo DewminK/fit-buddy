@@ -50,9 +50,15 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
           email: values.email,
           password: values.password,
         })).unwrap();
-        Alert.alert('Success', 'Account created successfully!');
-      } catch (err) {
-        Alert.alert('Registration Failed', 'Please try again');
+        Alert.alert(
+          '🎉 Success!', 
+          `Welcome ${values.firstName}! Your account has been created. You will be automatically logged in.`,
+          [{ text: 'OK' }]
+        );
+        // User will be automatically logged in and navigation handled by root navigator
+      } catch (err: any) {
+        const errorMessage = err || 'Registration failed. Please try again.';
+        Alert.alert('Registration Failed', errorMessage);
       }
     },
   });

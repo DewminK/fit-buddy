@@ -5,15 +5,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Switch,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
-import { toggleTheme } from '../../store/slices/themeSlice';
 import { lightTheme, darkTheme } from '../../constants/themes';
+import AppHeader from '../../components/AppHeader';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -22,10 +22,6 @@ export default function ProfileScreen() {
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const favorites = useAppSelector((state: any) => state.favorites.favorites);
   const theme = isDark ? darkTheme : lightTheme;
-
-  const handleToggleTheme = () => {
-    dispatch(toggleTheme());
-  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -48,17 +44,19 @@ export default function ProfileScreen() {
   const styles = createStyles;
 
   return (
-    <ScrollView style={styles(theme).container}>
-      {/* Header */}
-      <View style={styles(theme).header}>
-        <View style={styles(theme).avatarContainer}>
-          <Feather name="user" size={48} color={theme.colors.primary} />
+    <SafeAreaView style={styles(theme).container} edges={['bottom']}>
+      <AppHeader title="Profile" subtitle="Manage your account" />
+      <ScrollView>
+        {/* Header */}
+        <View style={styles(theme).header}>
+          <View style={styles(theme).avatarContainer}>
+            <Feather name="user" size={48} color={theme.colors.primary} />
+          </View>
+          <Text style={styles(theme).name}>
+            {user?.firstName} {user?.lastName}
+          </Text>
+          <Text style={styles(theme).email}>{user?.email}</Text>
         </View>
-        <Text style={styles(theme).name}>
-          {user?.firstName} {user?.lastName}
-        </Text>
-        <Text style={styles(theme).email}>{user?.email}</Text>
-      </View>
 
       {/* Stats Section */}
       <View style={styles(theme).statsContainer}>
@@ -82,23 +80,6 @@ export default function ProfileScreen() {
       {/* Settings Section */}
       <View style={styles(theme).section}>
         <Text style={styles(theme).sectionTitle}>Settings</Text>
-
-        <View style={styles(theme).settingCard}>
-          <View style={styles(theme).settingLeft}>
-            <Feather
-              name={isDark ? 'moon' : 'sun'}
-              size={22}
-              color={theme.colors.text}
-            />
-            <Text style={styles(theme).settingText}>Dark Mode</Text>
-          </View>
-          <Switch
-            value={isDark}
-            onValueChange={handleToggleTheme}
-            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-            thumbColor="#FFFFFF"
-          />
-        </View>
 
         <TouchableOpacity style={styles(theme).settingCard}>
           <View style={styles(theme).settingLeft}>
@@ -158,7 +139,8 @@ export default function ProfileScreen() {
 
       {/* App Version */}
       <Text style={styles(theme).version}>FitBuddy v1.0.0</Text>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -171,7 +153,7 @@ const createStyles = (theme: typeof lightTheme) =>
     header: {
       alignItems: 'center',
       padding: theme.spacing.xl,
-      paddingTop: theme.spacing.xl * 1.5,
+      paddingTop: theme.spacing.md,
     },
     avatarContainer: {
       width: 100,

@@ -8,15 +8,20 @@ import {
   ActivityIndicator,
   RefreshControl,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchExercises, setFilter } from '../../store/slices/exercisesSlice';
+import { toggleFavorite } from '../../store/slices/favoritesSlice';
 import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../../constants/themes';
 import { Exercise } from '../../store/slices/exercisesSlice';
+import ExerciseCard from '../../components/ExerciseCard';
+import AppHeader from '../../components/AppHeader';
+import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 
-const MUSCLES = ['all', 'chest', 'back', 'biceps', 'triceps', 'shoulders', 'quadriceps', 'abdominals', 'lats'];
+const MUSCLES = ['all', 'chest', 'back', 'biceps', 'triceps', 'shoulders', 'quadriceps', 'abdominals', 'lats', 'hamstrings', 'calves'];
 const DIFFICULTIES = ['all', 'beginner', 'intermediate', 'expert'];
 
 export default function HomeScreen() {
@@ -62,64 +67,27 @@ export default function HomeScreen() {
     exercise.muscle.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderExerciseCard = ({ item }: { item: Exercise }) => (
-    <TouchableOpacity
-      style={styles(theme).card}
+  const handleFavoriteToggle = (exercise: Exercise) => {
+    dispatch(toggleFavorite(exercise));
+  };
+
+  const renderExerciseCard = ({ item, index }: { item: Exercise; index: number }) => (
+    <ExerciseCard
+      exercise={item}
       onPress={() => router.push({ pathname: '/exercise-detail', params: { exercise: JSON.stringify(item) } })}
-      activeOpacity={0.7}
-    >
-      <View style={styles(theme).cardHeader}>
-        <View style={styles(theme).iconContainer}>
-          <Feather
-            name={getMuscleIcon(item.muscle) as any}
-            size={32}
-            color={theme.colors.primary}
-          />
-        </View>
-        <View style={styles(theme).cardHeaderContent}>
-          <Text style={styles(theme).cardTitle} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <View style={styles(theme).cardMeta}>
-            <View style={[styles(theme).badge, { backgroundColor: getDifficultyColor(item.difficulty, theme) + '20' }]}>
-              <Text style={[styles(theme).badgeText, { color: getDifficultyColor(item.difficulty, theme) }]}>
-                {item.difficulty}
-              </Text>
-            </View>
-            <View style={[styles(theme).badge, { backgroundColor: theme.colors.info + '20' }]}>
-              <Text style={[styles(theme).badgeText, { color: theme.colors.info }]}>
-                {item.type}
-              </Text>
-            </View>
-          </View>
-        </View>
-        {isFavorite(item.name) && (
-          <Feather name="heart" size={24} color={theme.colors.error} style={{ marginLeft: 8 }} />
-        )}
-      </View>
-      
-      <Text style={styles(theme).cardDescription} numberOfLines={2}>
-        Target: {item.muscle} • Equipment: {item.equipment}
-      </Text>
-      
-      <View style={styles(theme).cardFooter}>
-        <Feather name="chevron-right" size={20} color={theme.colors.primary} />
-      </View>
-    </TouchableOpacity>
+      onFavoritePress={() => handleFavoriteToggle(item)}
+      isFavorite={isFavorite(item.name)}
+      theme={theme}
+      index={index}
+    />
   );
 
   const styles = createStyles;
 
   return (
-    <View style={styles(theme).container}>
-      {/* Header */}
-      <View style={styles(theme).header}>
-        <View>
-          <Text style={styles(theme).greeting}>Hello, {user?.firstName || 'User'}!</Text>
-          <Text style={styles(theme).headerTitle}>Ready to workout?</Text>
-        </View>
-        <Feather name="activity" size={32} color={theme.colors.primary} />
-      </View>
+    <SafeAreaView style={styles(theme).container} edges={['bottom']}>
+      {/* Header with theme toggle */}
+      <AppHeader />
 
       {/* Search Bar */}
       <View style={styles(theme).searchContainer}>
@@ -226,7 +194,7 @@ export default function HomeScreen() {
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -235,23 +203,6 @@ const createStyles = (theme: typeof lightTheme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.xl,
-    },
-    greeting: {
-      fontSize: theme.fontSize.md,
-      color: theme.colors.textSecondary,
-    },
-    headerTitle: {
-      fontSize: theme.fontSize.xl,
-      fontWeight: theme.fontWeight.bold,
-      color: theme.colors.text,
-      marginTop: theme.spacing.xs,
     },
     searchContainer: {
       flexDirection: 'row',

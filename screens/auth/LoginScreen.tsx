@@ -40,8 +40,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       try {
         await dispatch(login(values)).unwrap();
         // Navigation will be handled by the root navigator
-      } catch (err) {
-        Alert.alert('Login Failed', 'Invalid username or password');
+      } catch (err: any) {
+        const errorMessage = err || 'Invalid username or password. Please check your credentials or sign up for a new account.';
+        Alert.alert('Login Failed', errorMessage);
       }
     },
   });
@@ -125,9 +126,12 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
             {/* Demo Credentials */}
             <View style={styles.demoContainer}>
-              <Text style={styles.demoText}>Demo Credentials:</Text>
+              <Text style={styles.demoText}>📌 Demo Credentials (Optional):</Text>
               <Text style={styles.demoCredentials}>Username: emilys</Text>
               <Text style={styles.demoCredentials}>Password: emilyspass</Text>
+              <Text style={[styles.demoCredentials, { marginTop: 8, fontSize: 11 }]}>
+                Or create your own account below! ⬇️
+              </Text>
             </View>
 
             {/* Register Link */}

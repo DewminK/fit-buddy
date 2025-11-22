@@ -4,11 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { Provider } from 'react-redux';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { store } from '../store';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loadUser } from '../store/slices/authSlice';
 import { loadFavorites } from '../store/slices/favoritesSlice';
 import { loadTheme } from '../store/slices/themeSlice';
+import { loadWaterData } from '../store/slices/waterSlice';
+import { loadWorkouts } from '../store/slices/workoutsSlice';
 
 function RootLayoutNav() {
   const router = useRouter();
@@ -24,6 +27,15 @@ function RootLayoutNav() {
       await dispatch(loadUser());
       await dispatch(loadFavorites());
       await dispatch(loadTheme());
+      await dispatch(loadWaterData());
+      
+      // Load workouts from AsyncStorage
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const storedWorkout = await AsyncStorage.getItem('fitbuddy_workouts');
+      if (storedWorkout) {
+        dispatch(loadWorkouts(JSON.parse(storedWorkout)));
+      }
+      
       setIsNavigationReady(true);
     };
     loadData();
@@ -33,21 +45,28 @@ function RootLayoutNav() {
     if (!isNavigationReady) return;
 
     const inAuthGroup = segments[0] === 'auth';
+    const inWelcome = segments[0] === 'welcome';
+    const inTabs = segments[0] === '(tabs)';
 
     setTimeout(() => {
-      if (!isAuthenticated && !inAuthGroup) {
-        router.replace('/auth/login');
-      } else if (isAuthenticated && inAuthGroup) {
+      // If not authenticated and not in auth or welcome, go to welcome
+      if (!isAuthenticated && !inAuthGroup && !inWelcome) {
+        router.replace('/welcome');
+      } 
+      // If authenticated and in auth or welcome, go to tabs
+      else if (isAuthenticated && (inAuthGroup || inWelcome)) {
         router.replace('/(tabs)');
       }
     }, 1);
   }, [isAuthenticated, segments, isNavigationReady]);
 
   return (
-    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-      <Slot />
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+        <Slot />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

@@ -5,11 +5,14 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleFavorite } from '../store/slices/favoritesSlice';
+import { addExerciseToWorkout } from '../store/slices/workoutsSlice';
 import { lightTheme, darkTheme, getDifficultyColor, getMuscleIcon } from '../constants/themes';
 import { Exercise } from '../store/slices/exercisesSlice';
 
@@ -19,6 +22,7 @@ export default function ExerciseDetailScreen() {
   const dispatch = useAppDispatch();
   const isDark = useAppSelector((state: any) => state.theme.isDark);
   const favorites = useAppSelector((state: any) => state.favorites.favorites);
+  const currentWorkout = useAppSelector((state: any) => state.workouts.currentWorkout);
   const theme = isDark ? darkTheme : lightTheme;
 
   const exercise: Exercise = params.exercise ? JSON.parse(params.exercise as string) : null;
@@ -32,15 +36,36 @@ export default function ExerciseDetailScreen() {
   }
 
   const isFavorite = favorites.some((fav: any) => fav.name === exercise.name);
+  const isInWorkout = currentWorkout.some((ex: any) => ex.name === exercise.name);
 
   const handleToggleFavorite = () => {
     dispatch(toggleFavorite(exercise));
   };
 
+  const handleAddToWorkout = () => {
+    if (isInWorkout) {
+      Alert.alert(
+        'Already Added',
+        'This exercise is already in your current workout.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      dispatch(addExerciseToWorkout(exercise));
+      Alert.alert(
+        'Success! 🎉',
+        `${exercise.name} added to your workout.`,
+        [
+          { text: 'Continue', style: 'cancel' },
+          { text: 'View Workout', onPress: () => router.push('/(tabs)/profile') },
+        ]
+      );
+    }
+  };
+
   const styles = createStyles;
 
   return (
-    <View style={styles(theme).container}>
+    <SafeAreaView style={styles(theme).container} edges={['top', 'bottom']}>
       {/* Header */}
       <View style={styles(theme).header}>
         <TouchableOpacity
@@ -142,14 +167,27 @@ export default function ExerciseDetailScreen() {
       {/* Bottom Action */}
       <View style={styles(theme).bottomAction}>
         <TouchableOpacity
-          style={[styles(theme).actionButton, { flex: 1, backgroundColor: theme.colors.primary }]}
+          style={[
+            styles(theme).actionButton,
+            {
+              flex: 1,
+              backgroundColor: isInWorkout ? theme.colors.success : theme.colors.primary,
+            },
+          ]}
           activeOpacity={0.7}
+          onPress={handleAddToWorkout}
         >
-          <Feather name="plus-circle" size={20} color="#FFFFFF" />
-          <Text style={styles(theme).actionButtonText}>Add to Workout</Text>
+          <Feather
+            name={isInWorkout ? 'check-circle' : 'plus-circle'}
+            size={20}
+            color="#FFFFFF"
+          />
+          <Text style={styles(theme).actionButtonText}>
+            {isInWorkout ? 'Added to Workout' : 'Add to Workout'}
+          </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -164,7 +202,7 @@ const createStyles = (theme: typeof lightTheme) =>
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing.xl,
+      paddingTop: theme.spacing.md,
       paddingBottom: theme.spacing.md,
     },
     backButton: {
