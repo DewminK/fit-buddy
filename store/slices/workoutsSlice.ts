@@ -103,6 +103,11 @@ const workoutsSlice = createSlice({
           .catch((error) => console.error('Failed to clear current workout:', error));
       }
     },
+    
+    resetWorkouts: (state) => {
+      state.currentWorkout = [];
+      state.savedWorkouts = [];
+    },
   },
 });
 
@@ -113,6 +118,7 @@ export const {
   clearCurrentWorkout,
   loadWorkouts,
   saveCurrentWorkout,
+  resetWorkouts,
 } = workoutsSlice.actions;
 
 export default workoutsSlice.reducer;

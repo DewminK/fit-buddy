@@ -131,9 +131,6 @@ export default function WelcomeScreen() {
             <Feather name="arrow-right" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </Animated.View>
-
-        {/* Footer */}
-        <Text style={styles.footer}>Stay fit, stay healthy 💪</Text>
       </View>
     </View>
   );

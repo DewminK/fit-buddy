@@ -123,13 +123,6 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            {/* Demo Credentials */}
-            <View style={styles.demoContainer}>
-              <Text style={styles.demoText}>Demo Credentials:</Text>
-              <Text style={styles.demoCredentials}>Username: emilys</Text>
-              <Text style={styles.demoCredentials}>Password: emilyspass</Text>
-            </View>
-
             {/* Register Link */}
             <TouchableOpacity
               style={styles.linkContainer}

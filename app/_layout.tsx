@@ -9,12 +9,12 @@ import { Provider } from 'react-redux';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { store } from '../store';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loadUser } from '../store/slices/authSlice';
+import { loadUser, logout } from '../store/slices/authSlice';
 import { loadFavorites } from '../store/slices/favoritesSlice';
-import { loadNotifications } from '../store/slices/notificationsSlice';
+import { clearAllNotifications, loadNotifications } from '../store/slices/notificationsSlice';
 import { loadTheme } from '../store/slices/themeSlice';
 import { loadWaterData } from '../store/slices/waterSlice';
-import { loadWorkouts } from '../store/slices/workoutsSlice';
+import { loadWorkouts, resetWorkouts } from '../store/slices/workoutsSlice';
 
 // Suppress yellow box warnings in production
 if (!__DEV__) {
@@ -55,34 +55,39 @@ function RootLayoutNav() {
     // Load persisted data
     const loadData = async () => {
       try {
-        await dispatch(loadUser());
-        await dispatch(loadFavorites());
-        await dispatch(loadTheme());
-        await dispatch(loadWaterData());
-        
-        // Load workouts from AsyncStorage
+        // Import AsyncStorage
         const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
         
+        // CLEAR ALL ASYNCSTORAGE DATA (user, workouts, notifications)
+        await AsyncStorage.clear();
+        console.log('✅ AsyncStorage cleared - all user data, workouts, and notifications removed');
+        
+        // Clear SecureStore tokens
         try {
-          const storedWorkout = await AsyncStorage.getItem('fitbuddy_workouts');
-          if (storedWorkout) {
-            dispatch(loadWorkouts(JSON.parse(storedWorkout)));
-          }
+          const SecureStore = await import('expo-secure-store');
+          await SecureStore.deleteItemAsync('token');
+          await SecureStore.deleteItemAsync('user');
+          console.log('✅ SecureStore cleared - all tokens removed');
         } catch (error) {
-          console.error('Failed to load workouts:', error);
+          console.error('Failed to clear SecureStore:', error);
         }
         
-        // Load notifications from AsyncStorage
-        try {
-          const storedNotifications = await AsyncStorage.getItem('fitbuddy_notifications');
-          if (storedNotifications) {
-            dispatch(loadNotifications(JSON.parse(storedNotifications)));
-          }
-        } catch (error) {
-          console.error('Failed to load notifications:', error);
-        }
+        // Reset all Redux slices to initial state
+        dispatch(logout());
+        dispatch(resetWorkouts());
+        dispatch(clearAllNotifications());
+        console.log('✅ Redux state reset - all in-memory data cleared');
+        
+        // Don't load any persisted data since we just cleared everything
+        // await dispatch(loadUser());
+        // await dispatch(loadFavorites());
+        // await dispatch(loadTheme());
+        // await dispatch(loadWaterData());
+        // await dispatch(loadWorkouts());
+        // await dispatch(loadNotifications());
+        
       } catch (error) {
-        console.error('Failed to load initial app data:', error);
+        console.error('Failed to clear app data:', error);
       } finally {
         // Always set navigation ready even if some data fails to load
         setIsNavigationReady(true);
